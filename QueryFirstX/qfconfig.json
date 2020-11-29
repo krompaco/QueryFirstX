@@ -1,0 +1,18 @@
+﻿[
+	{
+		"projectType": "cSharpCore",
+		"qfConfig": {
+			"generators": [
+				{ "name": "cSharpCore" }
+			]
+		}
+	},
+	{
+		"projectType": "cSharp",
+		"qfConfig": {
+			"generators": [
+				{ "name": "cSharp" }
+			]
+		}
+	}
+]
