@@ -16,7 +16,7 @@ namespace QueryFirst
             var _results = new ResultClassMaker();
             Code.Append(_wrapper.StartNamespace(state));
             Code.Append(_wrapper.Usings(state));
-            if (state._4Config.MakeSelfTest.GetValueOrDefault())
+            if (state._3Config.MakeSelfTest.GetValueOrDefault())
                 Code.Append(_wrapper.SelfTestUsings(state));
             if (state._7ResultFields != null && state._7ResultFields.Count > 0)
                 Code.Append(_results.Usings());
@@ -28,7 +28,7 @@ namespace QueryFirst
             //Code.Append(_provider.MakeAddAParameter(state));
             Code.Append(_wrapper.MakeTvpPocos(state));
 
-            if (state._4Config.MakeSelfTest.GetValueOrDefault())
+            if (state._3Config.MakeSelfTest.GetValueOrDefault())
                 Code.Append(_wrapper.MakeSelfTestMethod(state));
             if (state._7ResultFields != null && state._7ResultFields.Count > 0)
             {

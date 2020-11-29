@@ -15,7 +15,7 @@ namespace QueryFirst
         }
         public State Go(ref State state)
         {
-            var queryParams = _provider.ParseDeclaredParameters(state._6QueryWithParamsAdded, state._4Config.DefaultConnection);
+            var queryParams = _provider.ParseDeclaredParameters(state._6QueryWithParamsAdded, state._3Config.DefaultConnection);
             if (queryParams.Where(param => param.DbType == "UserDefinedTableType").Count() != 0)
                 state._8HasTableValuedParams = true;
             var fullSig = new StringBuilder();

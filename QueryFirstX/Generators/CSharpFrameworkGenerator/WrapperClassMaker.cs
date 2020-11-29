@@ -7,35 +7,34 @@ namespace QueryFirst
 {
     public class WrapperClassMaker : IWrapperClassMaker
     {
+        static readonly string n = Environment.NewLine;
         public virtual string Usings(State state)
         {
             return @"using System;
 using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.IO;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;" +
-$"\nusing static {state._1BaseName};" +
-(state._8HasTableValuedParams ? "\nusing FastMember; // Table valued params require the FastMember Nuget package\n" : "\n");
-
-
+$@"{n}using static {state._1BaseName};
+{(state._8HasTableValuedParams ? $@"{n}using FastMember; // Table valued params require the FastMember Nuget package{n}" : n)}";
         }
+
         public virtual string StartNamespace(State state)
         {
-            if (!string.IsNullOrEmpty(state._2Namespace))
-                return "namespace " + state._2Namespace + "{" + Environment.NewLine;
+            if (!string.IsNullOrEmpty(state._4Namespace))
+                return "namespace " + state._4Namespace + "{" + Environment.NewLine;
             else
                 return "";
         }
         public virtual string StartClass(State state)
         {
             return
-$"public partial class {state._1BaseName} : I{state._1BaseName}{Environment.NewLine}{{" +
-@"// props for params
-" + string.Join("", state._8QueryParams.Select(qp => $"public {qp.CSType} {qp.CSNamePascal}{{get;set;}}")) + @"
-void AppendExececutionMessage(string msg) { ExecutionMessages += msg + Environment.NewLine; }       
-public string ExecutionMessages { get; protected set; }
+$@"public partial class {state._1BaseName} : I{state._1BaseName}{Environment.NewLine}{{
+{string.Join("", state._8QueryParams.Select(qp => $"public {qp.CSType} {qp.CSNamePascal}{{get;set;}}"))}
+void AppendExececutionMessage(string msg) {{ ExecutionMessages += msg + Environment.NewLine; }}       
+public string ExecutionMessages {{ get; protected set; }}
 ";
 
         }
@@ -47,28 +46,28 @@ public string ExecutionMessages { get; protected set; }
             if (state._8QueryParams.Count > 0)
             {
                 code.AppendLine(
-    $"public virtual List<{state._2ResultInterfaceName}> Execute({state._8MethodSignature.Trim(spaceComma)})\r\n{{" + @"
-" + string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{ qp.CSNamePascal} = { qp.CSNameCamel};\r\n")) + @"
+    $@"public virtual List<{state._4ResultInterfaceName}> Execute({state._8MethodSignature.Trim(spaceComma)}){n}{{
+{string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{ qp.CSNamePascal} = { qp.CSNameCamel};{n}"))}
 using (IDbConnection conn = QfRuntimeConnection.GetConnection())
-{
+{{
 conn.Open();
 var returnVal = Execute(conn).ToList();
-" + string.Join(";\r\n", state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{qp.CSNameCamel} = {qp.CSNamePascal}")) + @";
+{ string.Join(n, state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{qp.CSNameCamel} = {qp.CSNamePascal}"))};
 return returnVal;
-}
-}");
+}}
+}}");
             }
             code.AppendLine(
-@"
-public virtual List<" + state._2ResultInterfaceName + @"> Execute()
-{
+$@"
+public virtual List<{state._4ResultInterfaceName}> Execute()
+{{
 using (IDbConnection conn = QfRuntimeConnection.GetConnection())
-{
+{{
 conn.Open();
 var returnVal = Execute(conn).ToList();
 return returnVal;
-}
-}
+}}
+}}
 ");
             return code.ToString();
         }
@@ -79,20 +78,20 @@ return returnVal;
             if (state._8QueryParams.Count > 0)
             {
                 code.AppendLine(
-$"public virtual IEnumerable<{state._2ResultInterfaceName}> Execute({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null){{" +
-            string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{qp.CSNamePascal} = {qp.CSNameCamel};\r\n")) + @"
+$@"public virtual IEnumerable<{state._4ResultInterfaceName}> Execute({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null){{
+{string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{qp.CSNamePascal} = {qp.CSNameCamel};{n}"))}
 var returnVal = Execute(conn);
-" + string.Join("", state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{ qp.CSNameCamel} = { qp.CSNamePascal};\r\n")) + // assign output params from prome
-@"return returnVal;
-}"
+{string.Join("", state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{ qp.CSNameCamel} = { qp.CSNamePascal};{n}"))}
+return returnVal;
+}}"
                 );
             }
             // Inner exec with no args. Parameters have already been stocked in class props.
             code.AppendLine(
-$"public virtual IEnumerable<{state._2ResultInterfaceName}> Execute(IDbConnection conn, IDbTransaction tx = null){{\r\n" +
-state._8HookupExecutionMessagesMethodText + @"
+$@"public virtual IEnumerable<{state._4ResultInterfaceName}> Execute(IDbConnection conn, IDbTransaction tx = null){{{n}
+{state._8HookupExecutionMessagesMethodText}
 using(IDbCommand cmd = conn.CreateCommand())
-{
+{{
 if(tx != null)
 cmd.Transaction = tx;
 cmd.CommandText = getCommandText();"
@@ -110,31 +109,31 @@ cmd.CommandText = getCommandText();"
 
 
                 //code.AppendLine("AddAParameter(cmd, \"" + qp.DbType + "\", \"" + qp.DbName + "\", " + qp.CSName + ", " + qp.Length + ", " + qp.Scale + ", " + qp.Precision + ");");
-                code.Append(@"
-{
+                code.Append($@"
+{{
 var myParam = cmd.CreateParameter();
-myParam.Direction = " + direction + @";
-myParam.ParameterName = """ + qp.DbName + @""";
-myParam.DbType = (DbType)Enum.Parse(typeof(DbType), """ + qp.DbType + "\");\r\n" +
-(qp.IsInput ? $"myParam.Value = (object){qp.CSNamePascal} ?? DBNull.Value;" : "") + Environment.NewLine +
-@"cmd.Parameters.Add(myParam);
-}"
+myParam.Direction = {direction};
+myParam.ParameterName = ""{qp.DbName}"";
+myParam.DbType = (DbType)Enum.Parse(typeof(DbType), ""{qp.DbType}"");
+{(qp.IsInput ? $"myParam.Value = (object){qp.CSNamePascal} ?? DBNull.Value;" : "") + n}
+cmd.Parameters.Add(myParam);
+}}"
                 );
 
             }
-            code.Append(@"
+            code.Append($@"
 using (var reader = cmd.ExecuteReader())
-{
+{{
 while (reader.Read())
-{
+{{
 yield return Create(reader);
-}
-}
+}}
+}}
 
 // Assign output parameters to instance properties. These will be available after this method returns.
-" + string.Join("", state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{qp.CSNamePascal} = ((SqlParameter)cmd.Parameters[\"{qp.DbName}\"]).Value == DBNull.Value?null:({qp.CSType})((SqlParameter)cmd.Parameters[\"{qp.DbName}\"]).Value;\r\n")) + @"
-}
-}
+{string.Join("", state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{qp.CSNamePascal} = ((SqlParameter)cmd.Parameters[\"{qp.DbName}\"]).Value == DBNull.Value?null:({qp.CSType})((SqlParameter)cmd.Parameters[\"{qp.DbName}\"]).Value;{n}"))}
+}}
+}}
 ");
 
 
@@ -150,26 +149,26 @@ yield return Create(reader);
                 if (state._8QueryParams.Count > 0)
                 {
                     code +=
-$"public virtual {state._2ResultInterfaceName} GetOne({state._8MethodSignature.Trim(spaceComma)})" + @"
-{
-" + string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{qp.CSNamePascal} = {qp.CSNameCamel};\r\n")) + @"
+$@"public virtual {state._4ResultInterfaceName} GetOne({state._8MethodSignature.Trim(spaceComma)})
+{{
+{string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{qp.CSNamePascal} = {qp.CSNameCamel};{n}"))}
 using (IDbConnection conn = QfRuntimeConnection.GetConnection())
-{
+{{
 conn.Open();
 var returnVal = GetOne(conn);
 return returnVal;
-}
-}";
+}}
+}}";
                 }
                 code +=
-$"public virtual {state._2ResultInterfaceName}  GetOne()" + @"
-{
+$@"public virtual {state._4ResultInterfaceName}  GetOne()
+{{
 using (IDbConnection conn = QfRuntimeConnection.GetConnection())
-{
+{{
 conn.Open();
 return GetOne(conn);
-}
-}
+}}
+}}
 ";
                 return code;
             }
@@ -187,30 +186,30 @@ return GetOne(conn);
                 {
 
                     code +=
-$"public virtual {state._2ResultInterfaceName} GetOne({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)" + @"
-{
-" + string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{qp.CSNamePascal} = {qp.CSNameCamel};\r\n")) + @"
-{
+$@"public virtual {state._4ResultInterfaceName} GetOne({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
+{{
+{string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{qp.CSNamePascal} = {qp.CSNameCamel};{n}"))}
+{{
 var returnVal = GetOne(conn);
 return returnVal;
-}
-}";
+}}
+}}";
                 }
                 code +=
-$"public virtual {state._2ResultInterfaceName} GetOne(IDbConnection conn, IDbTransaction tx = null)" + @"
-{
-" + state._8HookupExecutionMessagesMethodText + @"
-{
+$@"public virtual {state._4ResultInterfaceName} GetOne(IDbConnection conn, IDbTransaction tx = null)
+{{
+{state._8HookupExecutionMessagesMethodText}
+{{
 var all = Execute(conn,tx);
-" + state._2ResultInterfaceName + @" returnVal;
-using (IEnumerator<" + state._2ResultInterfaceName + @"> iter = all.GetEnumerator())
-{
+{state._4ResultInterfaceName} returnVal;
+using (IEnumerator<{state._4ResultInterfaceName}> iter = all.GetEnumerator())
+{{
 iter.MoveNext();
 returnVal = iter.Current;
-}
+}}
 return returnVal;
-}
-}
+}}
+}}
 ";
                 return code;
             }
@@ -224,22 +223,24 @@ return returnVal;
             if (state._8QueryParams.Count > 0)
             {
                 code.AppendLine(
-"public virtual " + state._7ExecuteScalarReturnType + " ExecuteScalar(" + state._8MethodSignature.Trim(spaceComma) + @"){
-" + string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{qp.CSNamePascal} = {qp.CSNameCamel};\r\n")) + @"
+$@"public virtual {state._7ExecuteScalarReturnType} ExecuteScalar({state._8MethodSignature.Trim(spaceComma)})
+{{
+{string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{qp.CSNamePascal} = {qp.CSNameCamel};{n}"))}
 var returnVal = ExecuteScalar();
-" + string.Join(";\r\n", state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{qp.CSNameCamel} = {qp.CSNamePascal}")) + @";
+{string.Join(";" + n, state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{qp.CSNameCamel} = {qp.CSNamePascal}"))};
 return returnVal;
-}
+}}
 ");
             }
             code.AppendLine(
-@"public virtual " + state._7ExecuteScalarReturnType + @" ExecuteScalar(){
+$@"public virtual {state._7ExecuteScalarReturnType} ExecuteScalar()
+{{
 using (IDbConnection conn = QfRuntimeConnection.GetConnection())
-{
+{{
 conn.Open();
 return ExecuteScalar(conn);
-}
-}
+}}
+}}
 "
             );
             return code.ToString();
@@ -251,17 +252,21 @@ return ExecuteScalar(conn);
             if (state._8QueryParams.Count > 0)
             {
                 code.AppendLine(
-"public virtual " + state._7ExecuteScalarReturnType + " ExecuteScalar(" + state._8MethodSignature + @"IDbConnection conn, IDbTransaction tx = null){
-" + string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{qp.CSNamePascal} = {qp.CSNameCamel};\r\n")) + @"
+$@"public virtual {state._7ExecuteScalarReturnType} ExecuteScalar({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
+{{
+{string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{qp.CSNamePascal} = {qp.CSNameCamel};{n}"))}
 var returnVal = ExecuteScalar(conn, tx);
-" + string.Join(";\r\n", state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{qp.CSNameCamel} = {qp.CSNamePascal}")) + @";
+{string.Join(";"+n, state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{qp.CSNameCamel} = {qp.CSNamePascal}"))};
 return returnVal;
-}");
+}}
+");
             }
             code.AppendLine(
-@"public virtual " + state._7ExecuteScalarReturnType + @" ExecuteScalar(IDbConnection conn, IDbTransaction tx = null){
-" + state._8HookupExecutionMessagesMethodText + @"
-using(IDbCommand cmd = conn.CreateCommand()){
+$@"public virtual {state._7ExecuteScalarReturnType} ExecuteScalar(IDbConnection conn, IDbTransaction tx = null)
+{{
+{state._8HookupExecutionMessagesMethodText}
+using(IDbCommand cmd = conn.CreateCommand())
+{{
 if(tx != null)
 cmd.Transaction = tx;
 cmd.CommandText = getCommandText();
@@ -278,30 +283,30 @@ cmd.CommandText = getCommandText();
                 else
                     direction = "ParameterDirection.Input";
 
-                code.Append(@"
-{
+                code.Append($@"
+{{
 var myParam = cmd.CreateParameter();
-myParam.Direction = " + direction + @";
-myParam.ParameterName = """ + qp.DbName + @""";
-myParam.DbType = (DbType)Enum.Parse(typeof(DbType), """ + qp.DbType + "\");\r\n" +
-(qp.IsInput ? $"myParam.Value = (object){qp.CSNamePascal} ?? DBNull.Value;" : "") + Environment.NewLine +
-@"cmd.Parameters.Add(myParam);
-}"
+myParam.Direction = {direction};
+myParam.ParameterName = ""{qp.DbName}"";
+myParam.DbType = (DbType)Enum.Parse(typeof(DbType), ""{qp.DbType}"");
+{(qp.IsInput ? $"myParam.Value = (object){qp.CSNamePascal} ?? DBNull.Value;" : "") + n}
+cmd.Parameters.Add(myParam);
+}}"
                 );
 
             }
             code.AppendLine(
-@"var result = cmd.ExecuteScalar();
+$@"var result = cmd.ExecuteScalar();
 
 // only convert dbnull if nullable
 // Assign output parameters to instance properties. 
-" + string.Join("", state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{qp.CSNamePascal} = ((SqlParameter)cmd.Parameters[\"{qp.DbName}\"]).Value == DBNull.Value?null:({qp.CSType})((SqlParameter)cmd.Parameters[\"{qp.DbName}\"]).Value;\r\n")) + @"
+{string.Join("", state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{qp.CSNamePascal} = ((SqlParameter)cmd.Parameters[\"{qp.DbName}\"]).Value == DBNull.Value?null:({qp.CSType})((SqlParameter)cmd.Parameters[\"{qp.DbName}\"]).Value;{n}"))}
 if( result == null || result == DBNull.Value)
 return null;
 else
-return (" + state._7ExecuteScalarReturnType + @")result;
-}
-}
+return ({state._7ExecuteScalarReturnType})result;
+}}
+}}
 "
             );// close ExecuteScalar()
             return code.ToString();
@@ -316,9 +321,9 @@ return (" + state._7ExecuteScalarReturnType + @")result;
                 code +=
                 "public virtual int ExecuteNonQuery(" + state._8MethodSignature.Trim(spaceComma) + @")
 {
-" + string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{qp.CSNamePascal} = {qp.CSNameCamel};\r\n")) + @"
+" + string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{qp.CSNamePascal} = {qp.CSNameCamel};{n}")) + @"
 var returnVal = ExecuteNonQuery();
-" + string.Join(";\r\n", state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{qp.CSNameCamel} = {qp.CSNamePascal}")) + @";
+" + string.Join(";"+n, state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{qp.CSNameCamel} = {qp.CSNamePascal}")) + @";
 return returnVal;
 }
 ";
@@ -345,9 +350,9 @@ return ExecuteNonQuery(conn);
                 code.AppendLine(
 "public virtual int ExecuteNonQuery(" + state._8MethodSignature + @"IDbConnection conn, IDbTransaction tx = null)
 {
-" + string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{qp.CSNamePascal} = {qp.CSNameCamel};\r\n")) + @"
+" + string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{qp.CSNamePascal} = {qp.CSNameCamel};{n}")) + @"
 var returnVal = ExecuteNonQuery(conn, tx);
-" + string.Join(";\r\n", state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{qp.CSNameCamel} = {qp.CSNamePascal}")) + @";
+" + string.Join(";"+n, state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{qp.CSNameCamel} = {qp.CSNamePascal}")) + @";
 return returnVal;
 }
 ");
@@ -375,27 +380,28 @@ cmd.CommandText = getCommandText();
 
 
                 //code.AppendLine("AddAParameter(cmd, \"" + qp.DbType + "\", \"" + qp.DbName + "\", " + qp.CSName + ", " + qp.Length + ", " + qp.Scale + ", " + qp.Precision + ");");
-                code.Append(@"
-{
+                code.Append($@"
+{{
 var myParam = cmd.CreateParameter();
-myParam.Direction = " + direction + @";
-myParam.ParameterName = """ + qp.DbName + @""";
-myParam.DbType = (DbType)Enum.Parse(typeof(DbType), """ + qp.DbType + "\");\r\n" +
-(qp.IsInput ? $"myParam.Value = (object){qp.CSNamePascal} ?? DBNull.Value;" : "") + Environment.NewLine +
-@"cmd.Parameters.Add(myParam);
-}"
+myParam.Direction = {direction};
+myParam.ParameterName = ""{qp.DbName}"";
+myParam.DbType = (DbType)Enum.Parse(typeof(DbType), ""{qp.DbType}"");
+{(qp.IsInput ? $"myParam.Value = (object){qp.CSNamePascal} ?? DBNull.Value;" : "")}
+cmd.Parameters.Add(myParam);
+}}
+"
                 );
 
             }
             code.AppendLine(
-@"var result = cmd.ExecuteNonQuery();
+$@"var result = cmd.ExecuteNonQuery();
 
 // Assign output parameters to instance properties. 
-" + string.Join("", state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{qp.CSNamePascal} = ((SqlParameter)cmd.Parameters[\"{qp.DbName}\"]).Value == DBNull.Value?null:({qp.CSType})((SqlParameter)cmd.Parameters[\"{qp.DbName}\"]).Value;\r\n")) + @"
+{string.Join("", state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{qp.CSNamePascal} = ((SqlParameter)cmd.Parameters[\"{qp.DbName}\"]).Value == DBNull.Value?null:({qp.CSType})((SqlParameter)cmd.Parameters[\"{qp.DbName}\"]).Value;{n}"))}
 // only convert dbnull if nullable
 return result;
-}
-}
+}}
+}}
 "
             );// close ExecuteNonQuery()
             return code.ToString();
@@ -404,16 +410,22 @@ return result;
         public virtual string MakeCreateMethod(State state)
         {
             return
-@"public virtual " + state._2ResultInterfaceName + @" Create(IDataRecord record)
-{
+$@"public virtual { state._4ResultInterfaceName } Create(IDataRecord record)
+{{
 var returnVal = CreatePoco(record);
-" + string.Join("", state._7ResultFields.Select((f, index) => @"
-    if(record[" + index + "] != null && record[" + index + @"] != DBNull.Value)
-    returnVal." + f.CSColumnName + " =  (" + f.TypeCsShort + ")record[" + index + @"];
-")) + @"
-returnVal.OnLoad();
+{ string.Join("", state._7ResultFields.Select((f, index) => $@"
+    if(record[{ index }] != null && record[{ index }] != DBNull.Value)
+    returnVal.{f.CSColumnName } =  ({ f.TypeCsShort })record[{ index }];
+"))
+}
+// vestige from user partial
+//returnVal.OnLoad();
 return returnVal;
-}";
+}}
+{ state._4ResultInterfaceName } CreatePoco(System.Data.IDataRecord record)
+{{
+    return new { state._4ResultClassName }();
+}}";
         }
         public virtual string MakeGetCommandTextMethod(State state)
         {
@@ -440,9 +452,10 @@ return @""
         string makeAPoco(QueryParamInfo param)
         {
             return
-$"public class {param.InnerCSType}{{\n" +
-string.Join(",", param.ParamSchema.Select(col => $"public {col.CSType} {col.CSNameCamel}{{get; set;}}\n")) +
-"}\n";
+$@"public class {param.InnerCSType}{{
+{string.Join(",", param.ParamSchema.Select(col => $"public {col.CSType} {col.CSNameCamel}{{get; set;}}{n}"))}
+}}
+";
 
         }
         public virtual string MakeOtherMethods(State state)
@@ -455,7 +468,7 @@ string.Join(",", param.ParamSchema.Select(col => $"public {col.CSType} {col.CSNa
         }
         public virtual string CloseNamespace(State state)
         {
-            if (!string.IsNullOrEmpty(state._2Namespace))
+            if (!string.IsNullOrEmpty(state._4Namespace))
                 return "}" + Environment.NewLine;
             else
                 return "";
@@ -471,19 +484,19 @@ string.Join(",", param.ParamSchema.Select(col => $"public {col.CSType} {col.CSNa
                 if (state._8QueryParams.Count > 0)
                 {
                     code.AppendLine(
-"List<" + state._2ResultInterfaceName + "> Execute(" + state._8MethodSignature.Trim(spaceComma) + @");
-IEnumerable< " + state._2ResultInterfaceName + "> Execute(" + state._8MethodSignature + @"IDbConnection conn, IDbTransaction tx = null);
+"List<" + state._4ResultInterfaceName + "> Execute(" + state._8MethodSignature.Trim(spaceComma) + @");
+IEnumerable< " + state._4ResultInterfaceName + "> Execute(" + state._8MethodSignature + @"IDbConnection conn, IDbTransaction tx = null);
 " + state._7ExecuteScalarReturnType + " ExecuteScalar(" + state._8MethodSignature.Trim(spaceComma) + @");
 " + state._7ExecuteScalarReturnType + " ExecuteScalar(" + state._8MethodSignature + @"IDbConnection conn, IDbTransaction tx = null);
 "
                     );
                 }
                 code.AppendLine(
-@"List< " + state._2ResultInterfaceName + @" > Execute();
-IEnumerable<" + state._2ResultInterfaceName + @"> Execute(IDbConnection conn, IDbTransaction tx = null);
+@"List< " + state._4ResultInterfaceName + @" > Execute();
+IEnumerable<" + state._4ResultInterfaceName + @"> Execute(IDbConnection conn, IDbTransaction tx = null);
 " + state._7ExecuteScalarReturnType + @" ExecuteScalar();
 " + state._7ExecuteScalarReturnType + @" ExecuteScalar(IDbConnection conn, IDbTransaction tx = null);
-" + state._2ResultInterfaceName + @" Create(IDataRecord record);
+" + state._4ResultInterfaceName + @" Create(IDataRecord record);
 "
                 );
 
@@ -492,13 +505,13 @@ IEnumerable<" + state._2ResultInterfaceName + @"> Execute(IDbConnection conn, ID
                     if (state._8QueryParams.Count > 0)
                     {
                         code.AppendLine(
-state._2ResultInterfaceName + " GetOne(" + state._8MethodSignature.Trim(spaceComma) + @");
-" + state._2ResultInterfaceName + " GetOne(" + state._8MethodSignature + @"IDbConnection conn, IDbTransaction tx = null);"
+state._4ResultInterfaceName + " GetOne(" + state._8MethodSignature.Trim(spaceComma) + @");
+" + state._4ResultInterfaceName + " GetOne(" + state._8MethodSignature + @"IDbConnection conn, IDbTransaction tx = null);"
                         );
                     }
                     code.AppendLine(
-    state._2ResultInterfaceName + @" GetOne();
-" + state._2ResultInterfaceName + @" GetOne(IDbConnection conn, IDbTransaction tx = null);"
+    state._4ResultInterfaceName + @" GetOne();
+" + state._4ResultInterfaceName + @" GetOne(IDbConnection conn, IDbTransaction tx = null);"
                     );
                 }
                 else code.AppendLine("// GetOne methods are not available because they do not play well with output params.");
@@ -511,11 +524,11 @@ int ExecuteNonQuery(" + state._8MethodSignature + @"IDbConnection conn, IDbTrans
                 );
             }
             code.AppendLine(
-@"int ExecuteNonQuery();            
+$@"int ExecuteNonQuery();            
 int ExecuteNonQuery(IDbConnection conn, IDbTransaction tx = null);
-" + string.Join("", state._8QueryParams.Select(qp => $"{qp.CSType} {qp.CSNamePascal}{{get;set;}}\r\n")) + @"
-string ExecutionMessages { get; }
-}
+{string.Join("", state._8QueryParams.Select(qp => $"{qp.CSType} {qp.CSNamePascal}{{get;set;}}{n}"))}
+string ExecutionMessages {{ get; }}
+}}
 "
                 );
             return code.ToString();
@@ -542,7 +555,7 @@ using Xunit;
             code.AppendLine("queryText = queryText.Replace(\"/*designTime\", \"-- designTime\");");
             code.AppendLine("queryText = queryText.Replace(\"endDesignTime*/\", \"-- endDesignTime\");");
             // QfruntimeConnection will be used, but we still need to reference a provider, for the prepare parameters method.
-            code.AppendLine($"var schema = new AdoSchemaFetcher().GetFields(QfRuntimeConnection.GetConnection(), \"{state._4Config.Provider}\", queryText);");
+            code.AppendLine($"var schema = new AdoSchemaFetcher().GetFields(QfRuntimeConnection.GetConnection(), \"{state._3Config.Provider}\", queryText);");
             code.Append("Assert.True(" + state._7ResultFields.Count + " <=  schema.Count,");
             code.AppendLine("\"Query only returns \" + schema.Count.ToString() + \" columns. Expected at least " + state._7ResultFields.Count + ". \");");
             for (int i = 0; i < state._7ResultFields.Count; i++)

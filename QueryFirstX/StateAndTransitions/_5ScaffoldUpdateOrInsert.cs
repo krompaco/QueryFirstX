@@ -16,15 +16,15 @@ namespace QueryFirst
         }
         public State Go(ref State state)
         {
-            var matchInsert = Regex.Match(state._3InitialQueryText, @"^insert\s+into\s+(?<tableName>\w+)\.\.\.", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-            var matchUpdate = Regex.Match(state._3InitialQueryText, @"^update\s+(?<tableName>\w+)\.\.\.", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+            var matchInsert = Regex.Match(state._2InitialQueryText, @"^insert\s+into\s+(?<tableName>\w+)\.\.\.", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+            var matchUpdate = Regex.Match(state._2InitialQueryText, @"^update\s+(?<tableName>\w+)\.\.\.", RegexOptions.IgnoreCase | RegexOptions.Multiline);
             if (matchInsert.Success || matchUpdate.Success)
             {
                 var targetTable = matchInsert.Success ? matchInsert.Groups["tableName"].Value : matchUpdate.Groups["tableName"].Value;
                 // get schema
                 var cols = _schemaFetcher.GetFields(
-                    state._4Config.DefaultConnection,
-                    state._4Config.Provider,
+                    state._3Config.DefaultConnection,
+                    state._3Config.Provider,
                     $"select * from {targetTable}"
                 ).Where(col => (!col.IsIdentity && !(new string[] { "text","ntext","image","timestamp"}).Contains(col.TypeDb) /* && !col.IsComputed*/));
                 if (matchInsert.Success)
@@ -60,7 +60,7 @@ SET
 " + string.Join(",\r\n", cols.Select(col=> col.ColumnName + " = @" + col.ColumnName ));
                 }
             }
-            else state._5QueryAfterScaffolding = state._3InitialQueryText;
+            else state._5QueryAfterScaffolding = state._2InitialQueryText;
             return state;
         }
     }

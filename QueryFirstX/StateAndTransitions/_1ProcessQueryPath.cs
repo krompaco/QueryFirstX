@@ -17,7 +17,7 @@ namespace QueryFirst
             state._1BaseName = Path.GetFileNameWithoutExtension(queryPathAndFilename);
             state._1CurrDir = Path.GetDirectoryName(queryPathAndFilename) + "\\";
             state._1GeneratedClassFullFilename = state._1CurrDir + state._1BaseName + ".gen.cs";
-            state._1UserPartialClassFullFilename = state._1CurrDir + state._1BaseName + "Results.cs";
+            //state._1UserPartialClassFullFilename = state._1CurrDir + state._1BaseName + "Results.cs";
             return state;
         }
     }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace QueryFirst
 {
-    public class _3ReadQuery
+    public class _2ReadQuery
     {
         /// <summary>
         /// Reads from filesystem. Not testable.
@@ -20,7 +20,7 @@ namespace QueryFirst
                 throw new ArgumentNullException(nameof(state));
             // read source query
             // We've already checked the file exists. No sophistication.
-            state._3InitialQueryText = File.ReadAllText(state._1SourceQueryFullPath);
+            state._2InitialQueryText = File.ReadAllText(state._1SourceQueryFullPath);
             return state;
         }
     }

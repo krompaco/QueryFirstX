@@ -95,18 +95,7 @@ namespace QueryFirst
         }
     }
 
-    // the system serializer has no way of resolving pascal to camel case
-    public class QfConfigModel
-    {
-        public string DefaultConnection { get; set; }
-        public string Provider { get; set; }
-        public List<string> HelperAssemblies { get; set; }
-        public bool? MakeSelfTest { get; set; }
-        public List<Generator> Generators { get; set; }
-        public string Namespace { get; set; }
-
-    }
-    public class Generator
+     public class Generator
     {
         public string Name { get; set; }
     }

@@ -33,14 +33,14 @@ namespace QueryFirst
                 ProcessUpToStep4(sourcePath, outerConfig, ref _state);
 
                 // We have the config, we can instantiate our provider...
-                if (_tiny.CanResolve<IProvider>(_state._4Config.Provider))
-                    _provider = _tiny.Resolve<IProvider>(_state._4Config.Provider);
+                if (_tiny.CanResolve<IProvider>(_state._3Config.Provider))
+                    _provider = _tiny.Resolve<IProvider>(_state._3Config.Provider);
                 else
                     QfConsole.WriteLine(@"After resolving the config, we have no provider\n");
 
 
 
-                if (string.IsNullOrEmpty(_state._4Config.DefaultConnection))
+                if (string.IsNullOrEmpty(_state._3Config.DefaultConnection))
                 {
                     QfConsole.WriteLine(@"No design time connection string. You need to create qfconfig.json beside or above your query 
 or put --QfDefaultConnection=myConnectionString somewhere in your query file.
@@ -49,19 +49,22 @@ See the Readme section at https://marketplace.visualstudio.com/items?itemName=bb
                     return; // nothing to be done
 
                 }
-                if (!_tiny.CanResolve<IProvider>(_state._4Config.Provider))
+                if (!_tiny.CanResolve<IProvider>(_state._3Config.Provider))
                 {
                     QfConsole.WriteLine(string.Format(
 @"No Implementation of IProvider for providerName {0}. 
 The query {1} may not run and the wrapper has not been regenerated.\n",
-                    _state._4Config.Provider, _state._1BaseName
+                    _state._3Config.Provider, _state._1BaseName
                     ));
                     return;
                 }
+                // assign some names
+                new _4ExtractNamesFromUserPartialClass().Go(_state);
+
                 // Scaffold inserts and updates
                 _tiny.Resolve<_5ScaffoldUpdateOrInsert>().Go(ref _state);
 
-                if (_state._3InitialQueryText != _state._5QueryAfterScaffolding)
+                if (_state._2InitialQueryText != _state._5QueryAfterScaffolding)
                 {
                     
                 }
@@ -140,9 +143,9 @@ The query {1} may not run and the wrapper has not been regenerated.\n",
 
             // copy namespace of generated partial class from user partial class
 
-            new _3ReadQuery().Go(state);
-            var _4 = new _4ResolveConfig().BuildUp();
-            _4.Go(state);
+            new _2ReadQuery().Go(state);
+            var _3 = new _3ResolveConfig().BuildUp();
+            _3.Go(state, outerConfig);
         }
 
 

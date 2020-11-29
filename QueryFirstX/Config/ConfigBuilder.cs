@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace QueryFirst
 {
-    public class ConfigBuilder
+    public class ConfigBuilder : IConfigBuilder
     {
         public QfConfigModel GetInstallConfigForProjectType(List<ProjectSection> installFull, string projectType)
         {
@@ -21,7 +21,9 @@ namespace QueryFirst
                 HelperAssemblies = new List<string>(),
                 Generators = overides.Generators ?? overridden.Generators,
                 MakeSelfTest = overides.MakeSelfTest ?? overridden.MakeSelfTest,
-                Namespace = overides.Namespace ?? overridden.Namespace
+                Namespace = overides.Namespace ?? overridden.Namespace,
+                ResultClassName = overides.ResultClassName ?? overridden.ResultClassName,
+                ResultInterfaceName = overides.ResultInterfaceName ?? overridden.ResultInterfaceName
             };
 
             // helper assemblies. Unlike other config, these cumulate.

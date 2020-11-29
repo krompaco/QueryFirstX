@@ -35,21 +35,21 @@ namespace QueryFirst
         /// </summary>
         public string _1GeneratedClassFullFilename { get; set; }
         //public string _1UserPartialClassFullFilename { get; set; }
-        public string _2ResultClassName { get; set; }
-        public string _2ResultInterfaceName { get; set; }
-        public string _2Namespace { get; set; }
+        public string _4ResultClassName { get; set; }
+        public string _4ResultInterfaceName { get; set; }
+        public string _4Namespace { get; set; }
         /// <summary>
         /// Full text of the user partial file for in-memory compilation
         /// </summary>
-        //public string _2UserPartialFullText { get; set; }
+        //public string _4UserPartialFullText { get; set; }
         /// <summary>
         /// The unmodified text of the SQL query. The full contents of the .sql file when the user saves.
         /// </summary>
-        public string _3InitialQueryText { get; set; }
-        public QfConfigModel _4Config { get; set; }
+        public string _2InitialQueryText { get; set; }
+        public QfConfigModel _3Config { get; set; }
         /// <summary>
         /// Scaffolding of inserts and updates will completely modify the user's sql. If
-        /// this is not an insert or update, this prop will be the same as _3InitialQueryText
+        /// this is not an insert or update, this prop will be the same as _2InitialQueryText
         /// </summary>
         public string _5QueryAfterScaffolding { get; set; }
         public string _6NewParamDeclarations { get; set; }
