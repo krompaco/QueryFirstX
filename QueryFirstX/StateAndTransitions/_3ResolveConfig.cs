@@ -11,11 +11,9 @@ namespace QueryFirst
         public IConfigBuilder ConfigBuilder { get; set; }
         /// <summary>
         /// Returns the QueryFirst config for a given query file. Values specified directly in 
-        /// the query file will trump values specified in the qfconfig.json file.
-        /// We look for a qfconfig.json file beside the query file. If none found, we look in the parent directory,
-        /// and so on up to the root directory. 
+        /// the query's qfconfig.json file will override values specified in the project and install qfconfig.json files.
         /// 
-        /// If the query specifies a QfDefaultConnection but no QfDefaultConnectionProviderName, "System.Data.SqlClient"
+        /// If the config specifies a QfDefaultConnection but no QfDefaultConnectionProviderName, "System.Data.SqlClient"
         /// will be used.
         /// </summary>
         /// <param name="filePath"></param>

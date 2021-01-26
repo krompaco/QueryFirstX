@@ -19,8 +19,26 @@ namespace QueryFirst
                 throw new ArgumentNullException( nameof(state) );
             // also called in the bowels of schema fetching, for Postgres, because no notion of declarations.
             var undeclared = _provider.FindUndeclaredParameters(state._5QueryAfterScaffolding, state._3Config.DefaultConnection, out outputMessage);
-            state._6NewParamDeclarations = _provider.ConstructParameterDeclarations(undeclared);            
-            state._6QueryWithParamsAdded = state._5QueryAfterScaffolding.Replace("-- endDesignTime", state._6NewParamDeclarations + "-- endDesignTime");
+            state._6NewParamDeclarations = _provider.ConstructParameterDeclarations(undeclared);  
+            // with file watching, we must prevent an endless loop. Discovered parameters must be present for second pass.
+            if(state._5QueryAfterScaffolding.Contains("-- endDesignTime"))
+            {
+                state._6QueryWithParamsAdded = state._5QueryAfterScaffolding.Replace("-- endDesignTime", state._6NewParamDeclarations + "-- endDesignTime");
+            }
+            else
+            {
+                var rn = Environment.NewLine;
+                var endFirstLine = state._5QueryAfterScaffolding.IndexOf(rn) + rn.Length;
+                var firstLine = state._5QueryAfterScaffolding.Substring(0, endFirstLine);
+                var restOfQuery = state._5QueryAfterScaffolding.Substring(endFirstLine);
+                state._6QueryWithParamsAdded = $@"{firstLine}
+-- startDesignTime
+{state._6NewParamDeclarations}
+-- endDesignTime
+{restOfQuery}
+";
+
+            }
             state._6FinalQueryTextForCode = state._6QueryWithParamsAdded
                     .Replace("-- designTime", "/*designTime")
                     .Replace("-- endDesignTime", "endDesignTime*/")

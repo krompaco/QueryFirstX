@@ -13,7 +13,11 @@ namespace QueryFirst
             return installFull.Where(c => c.ProjectType == projectType).FirstOrDefault().QfConfig;
         }
         public QfConfigModel Resolve2Configs(QfConfigModel overridden, QfConfigModel overides)
-        {
+        {            
+            if(overridden == null)
+            {
+                return overides;
+            }
             QfConfigModel returnVal = new QfConfigModel
             {
                 DefaultConnection = overides.DefaultConnection ?? overridden.DefaultConnection,

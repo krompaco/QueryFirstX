@@ -26,11 +26,28 @@ namespace QueryFirst
             }
             return null;
         }
-        public QfConfigModel GetProjectConfig(string startFolder)
+        public QfConfigModel GetProjectConfig(string fileOrFolder)
         {
+            string searchStart;
+            if (File.Exists(fileOrFolder))
+            {
+                searchStart = Path.GetDirectoryName(fileOrFolder);
+            }
+            else if (Directory.Exists(fileOrFolder))
+            {
+                searchStart = fileOrFolder;
+            }
+            else
+            {
+                throw new ArgumentException("No such file or folder: " + fileOrFolder);
+            }
+            var projectConfigFileContents = GetProjectConfigFile(searchStart);
+            if(projectConfigFileContents == null)
+            {
+                return null;
+            }
             try
             {
-                var projectConfigFileContents = GetProjectConfigFile(startFolder);
                 var project = JsonConvert.DeserializeObject<QfConfigModel>(projectConfigFileContents);
                 SetDefaultProvider(project);
                 return project;
@@ -73,7 +90,7 @@ namespace QueryFirst
                     installConfig = JsonConvert.DeserializeObject<List<ProjectSection>>(installConfigFileContents);
                 }
                 else installConfig = new List<ProjectSection>();
-                foreach(var section in installConfig)
+                foreach (var section in installConfig)
                 {
                     SetDefaultProvider(section.QfConfig);
                 }
@@ -95,7 +112,7 @@ namespace QueryFirst
         }
     }
 
-     public class Generator
+    public class Generator
     {
         public string Name { get; set; }
     }

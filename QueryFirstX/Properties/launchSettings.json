@@ -2,7 +2,7 @@
   "profiles": {
     "QueryFirstX": {
       "commandName": "Project",
-      "commandLineArgs": "\"C:\\dev\\QueryFirstXTarget\\QueryFirstXTarget\\GetCustomers.sql\" -k"
+      "commandLineArgs": "\"C:\\dev\\QueryFirstXTarget\\QueryFirstXTarget\" -k"
     }
   }
 }
