@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace QueryFirst
 {
@@ -16,23 +13,23 @@ namespace QueryFirst
         public State Go(ref State state, out string outputMessage)
         {
             if (state == null)
-                throw new ArgumentNullException( nameof(state) );
+                throw new ArgumentNullException(nameof(state));
             // also called in the bowels of schema fetching, for Postgres, because no notion of declarations.
             var undeclared = _provider.FindUndeclaredParameters(state._5QueryAfterScaffolding, state._3Config.DefaultConnection, out outputMessage);
-            state._6NewParamDeclarations = _provider.ConstructParameterDeclarations(undeclared);  
+            state._6NewParamDeclarations = _provider.ConstructParameterDeclarations(undeclared);
             // with file watching, we must prevent an endless loop. Discovered parameters must be present for second pass.
-            if(state._5QueryAfterScaffolding.Contains("-- endDesignTime"))
+            if (state._5QueryAfterScaffolding.Contains("-- endDesignTime"))
             {
                 state._6QueryWithParamsAdded = state._5QueryAfterScaffolding.Replace("-- endDesignTime", state._6NewParamDeclarations + "-- endDesignTime");
             }
             else
             {
                 var rn = Environment.NewLine;
-                var endFirstLine = state._5QueryAfterScaffolding.IndexOf(rn) + rn.Length;
+                var m = Regex.Match(state._5QueryAfterScaffolding, @"\r\n?|\n");
+                var endFirstLine = m.Groups[0].Index + m.Groups[0].Length;
                 var firstLine = state._5QueryAfterScaffolding.Substring(0, endFirstLine);
                 var restOfQuery = state._5QueryAfterScaffolding.Substring(endFirstLine);
-                state._6QueryWithParamsAdded = $@"{firstLine}
--- startDesignTime
+                state._6QueryWithParamsAdded = $@"{firstLine}-- designTime
 {state._6NewParamDeclarations}
 -- endDesignTime
 {restOfQuery}

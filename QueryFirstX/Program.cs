@@ -10,20 +10,18 @@ namespace QueryFirst
         static bool keepOpen;
         public static void Main(string[] args)
         {
-            // create state object
-
             // parse args
-            var commandLineConfig = DefineAndParseOptions(args, out string sourcePath, out bool watch);
+            var startupOptions = DefineAndParseOptions(args);
 
-            // check we have a file
-            if (!string.IsNullOrEmpty(sourcePath) && !File.Exists(sourcePath) && !Directory.Exists(sourcePath))
+            // check we have a file (should never be empty because if nothing provided we take the current directory.)
+            if (!string.IsNullOrEmpty(startupOptions.SourcePath) && !File.Exists(startupOptions.SourcePath) && !Directory.Exists(startupOptions.SourcePath))
             {
-                QfConsole.WriteLine($@"The file or directory {sourcePath} does not exist. Exiting...");
+                QfConsole.WriteLine($@"The file or directory {startupOptions.SourcePath} does not exist. Exiting...");
                 return;
             }
             // fetch config query/project/install
             var configFileReader = new ConfigFileReader();
-            var projectConfig = configFileReader.GetProjectConfig(sourcePath);
+            var projectConfig = configFileReader.GetProjectConfig(startupOptions.SourcePath);
             var installConfig = configFileReader.GetInstallConfig();
 
             var projectType = new ProjectType().DetectProjectType();
@@ -35,13 +33,69 @@ namespace QueryFirst
             // register types
             RegisterTypes.Register(outerConfig.HelperAssemblies);
 
-            // Process one file
-            if (File.Exists(sourcePath))
+            // New Config
+            if (startupOptions.CreateConfig.GetValueOrDefault())
             {
-                if (watch)
+                var fileToCreate = Path.Join(Environment.CurrentDirectory, "qfconfig.json");
+                if (File.Exists(fileToCreate))
+                {
+                    Console.WriteLine($"QueryFirst: {fileToCreate} exists already. Skipping.");
+                }
+                File.WriteAllText(fileToCreate,
+$@"{{
+  ""defaultConnection"": ""Server = localhost\\SQLEXPRESS; Database = NORTHWND; Trusted_Connection = True; "",
+  ""provider"": ""System.Data.SqlClient"",
+  ""namespace"": ""MyNamespaceForCodeGeneration""
+}}
+            "
+                );
+            }
+            // New Runtime Connection
+            if (startupOptions.CreateRuntimeConnection.GetValueOrDefault())
+            {
+                var fileToCreate = Path.Join(Environment.CurrentDirectory, "QfRuntimeConnection.cs");
+                if (File.Exists(fileToCreate))
+                {
+                    Console.WriteLine($"QueryFirst: {fileToCreate} exists already. Skipping.");
+                }
+                File.WriteAllText(fileToCreate,
+$@"using Microsoft.Data.SqlClient;
+using System.Data;
+
+    class QfRuntimeConnection
+    {{
+        public static IDbConnection GetConnection()
+        {{
+            return new SqlConnection(""Server=localhost\\SQLEXPRESS;Database=NORTHWND;Trusted_Connection=True;"");
+        }}
+    }}
+"
+                );
+            }
+            // New query
+            if (!string.IsNullOrEmpty(startupOptions.NewQueryName))
+            {
+                if (!startupOptions.NewQueryName.EndsWith(".sql"))
+                    startupOptions.NewQueryName = startupOptions.NewQueryName + ".sql";
+                if (File.Exists(startupOptions.NewQueryName))
+                {
+                    Console.WriteLine($"QueryFirst: {startupOptions.NewQueryName} exists already. Exiting");
+                    return;
+                }
+                File.WriteAllText(startupOptions.NewQueryName,
+@"/* .sql query managed by QueryFirst */
+-- designTime - put parameter declarations and design time initialization here
+-- endDesignTime"
+                );
+                return;
+            }
+            // Process one file
+            if (File.Exists(startupOptions.SourcePath))
+            {
+                if (startupOptions.Watch)
                 {
                     // watch for changes or renaming of the specified file. (VS renames a temp file after deleting the original file)
-                    using (FileSystemWatcher watcher = new FileSystemWatcher(Path.GetDirectoryName(sourcePath), Path.GetFileName(sourcePath)))
+                    using (FileSystemWatcher watcher = new FileSystemWatcher(Path.GetDirectoryName(startupOptions.SourcePath), Path.GetFileName(startupOptions.SourcePath)))
                     {
                         watcher.NotifyFilter = NotifyFilters.LastAccess
                       | NotifyFilters.LastWrite
@@ -54,7 +108,7 @@ namespace QueryFirst
                             try
                             {
                                 var conductor = new Conductor().BuildUp();
-                                conductor.ProcessOneQuery(sourcePath, outerConfig);
+                                conductor.ProcessOneQuery(startupOptions.SourcePath, outerConfig);
                             }
                             catch (Exception ex)
                             {
@@ -68,7 +122,7 @@ namespace QueryFirst
                             try
                             {
                                 var conductor = new Conductor().BuildUp();
-                                conductor.ProcessOneQuery(sourcePath, outerConfig);
+                                conductor.ProcessOneQuery(startupOptions.SourcePath, outerConfig);
                             }
                             catch (Exception ex)
                             {
@@ -84,18 +138,18 @@ namespace QueryFirst
                 else
                 {
                     var conductor = new Conductor().BuildUp();
-                    conductor.ProcessOneQuery(sourcePath, outerConfig);
+                    conductor.ProcessOneQuery(startupOptions.SourcePath, outerConfig);
                 }
 
             }
 
             // Process a folder
-            if (Directory.Exists(sourcePath))
+            if (Directory.Exists(startupOptions.SourcePath))
             {
-                if (watch)
+                if (startupOptions.Watch)
                 {
                     // watch for changes or renaming of .sql files in the specified folder.
-                    using (FileSystemWatcher watcher = new FileSystemWatcher(sourcePath, "*.sql"))
+                    using (FileSystemWatcher watcher = new FileSystemWatcher(startupOptions.SourcePath, "*.sql"))
                     {
                         watcher.NotifyFilter = NotifyFilters.LastAccess
                       | NotifyFilters.LastWrite
@@ -143,7 +197,7 @@ namespace QueryFirst
                 }
                 else
                 {
-                    ProcessDirectory(sourcePath, outerConfig);
+                    ProcessDirectory(startupOptions.SourcePath, outerConfig);
                 }
 
                 if (keepOpen)
@@ -181,30 +235,28 @@ namespace QueryFirst
         /// https://github.com/xamarin/XamarinComponents/tree/master/XPlat/Mono.Options
         /// </summary>
         /// <param name="args">The command line args to parse</param>
-        /// <param name="sourcePath">Out param. The file or folder to process</param>
         /// <returns></returns>
-        static QfConfigModel DefineAndParseOptions(string[] args, out string sourcePath, out bool watch)
+        static StartupOptions DefineAndParseOptions(string[] args)
         {
-            bool _watch = false;
-            sourcePath = "";
+            var returnVal = new StartupOptions();
+            var commandLineConfig = new QfConfigModel();
+
             // these variables will be set when the command line is parsed
 
             // these are the available options, note that they set the variables
-            var commandLineConfig = new QfConfigModel();
             commandLineConfig.Generators = new List<Generator>();
             int verbosity = 0;
             var shouldShowHelp = false;
             var options = new OptionSet {
-                { "c|qfDefaultConnection", "Connection string for query generation, overrides config files.", c => commandLineConfig.DefaultConnection = c },
-                { "m|makeSelfTest", "Make integration test for query. Requires xunit. Overrides config files.", m => commandLineConfig.MakeSelfTest = m != null},
-                {"g|generator" , "Generator(s) to use. Will replace generators specified in config files", g => commandLineConfig.Generators.Add(new Generator{Name = g })},
-                { "v", "increase debug message verbosity", v => {
-                    if (v != null)
-                        ++verbosity;
-                } },
-                {"w|watch", "Watch for changes in the file or directory", w => _watch = w != null },
+                {"c|qfDefaultConnection=", "Connection string for query generation, overrides config files.", c => commandLineConfig.DefaultConnection = c },
+                {"m|makeSelfTest", "Make integration test for query. Requires xunit. Overrides config files.", m => commandLineConfig.MakeSelfTest = m != null},
+                {"g|generator=" , "Generator(s) to use. Will replace generators specified in config files", g => commandLineConfig.Generators.Add(new Generator{Name = g })},
+                {"w|watch", "Watch for changes in the file or directory", w => returnVal.Watch = w != null },
                 {"k|keepOpen", "Wait for a keystroke before exiting the console.", k => keepOpen = k != null },
-                { "h|help", "show this message and exit", h => shouldShowHelp = h != null },
+                {"h|help", "show this message and exit", h => shouldShowHelp = h != null },
+                {"n|new=", "create a new QueryFirst query with the specified name.", n => returnVal.NewQueryName = n },
+                {"j|newConfig", "create qfconfig.json in the current directory", nc => returnVal.CreateConfig = nc != null },
+                {"r|newRuntimeConnection", "create QfRuntimeConnection.cs in the current directory", nc => returnVal.CreateRuntimeConnection = nc != null },
             };
 
             // now parse the options...
@@ -214,16 +266,17 @@ namespace QueryFirst
                 // parse the command line
                 extra = options.Parse(args);
                 if (extra != null && extra.Count > 0 && !string.IsNullOrEmpty(extra[0]))
-                    sourcePath = extra[0];
+                    returnVal.SourcePath = extra[0];
                 else
-                    shouldShowHelp = true;
+                    // by default, process the current directory
+                    returnVal.SourcePath = Environment.CurrentDirectory;
             }
             catch (OptionException e)
             {
                 // output some error message
                 Console.Write("greet: ");
                 Console.WriteLine(e.Message);
-                Console.WriteLine("Try `greet --help' for more information.");
+                Console.WriteLine("Try `QueryFirst --help' for more information.");
                 return null;
             }
             finally
@@ -231,13 +284,21 @@ namespace QueryFirst
                 // clean up if none...
                 if (commandLineConfig.Generators.Count == 0)
                     commandLineConfig.Generators = null;
-                watch = _watch;
-
             }
             if (shouldShowHelp)
                 options.WriteOptionDescriptions(Console.Out);
-            return commandLineConfig;
+            returnVal.StartupConfig = commandLineConfig;
+            return returnVal;
         }
 
+    }
+    public class StartupOptions
+    {
+        public string SourcePath { get; set; }
+        public bool Watch { get; set; }
+        public string NewQueryName { get; set; }
+        public bool? CreateConfig { get; set; }
+        public bool? CreateRuntimeConnection { get; set; }
+        public QfConfigModel StartupConfig { get; set; }
     }
 }

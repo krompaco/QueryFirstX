@@ -2,7 +2,8 @@
   "profiles": {
     "QueryFirstX": {
       "commandName": "Project",
-      "commandLineArgs": "\"C:\\dev\\QueryFirstXTarget\\QueryFirstXTarget\" -k"
+      "commandLineArgs": "-w",
+      "workingDirectory": "C:\\dev\\QfNet5"
     }
   }
 }
