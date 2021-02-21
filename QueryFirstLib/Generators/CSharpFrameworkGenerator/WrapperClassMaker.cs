@@ -16,7 +16,8 @@ using Microsoft.Data.SqlClient;
 using System.IO;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;" +
+using System.Linq;
+using System.Text.RegularExpressions;" +
 $@"{n}using static {state._1BaseName};
 {(state._8HasTableValuedParams ? $@"{n}using FastMember; // Table valued params require the FastMember Nuget package{n}" : n)}";
         }
@@ -33,7 +34,8 @@ $@"{n}using static {state._1BaseName};
             return
 $@"public partial class {state._1BaseName} : I{state._1BaseName}{Environment.NewLine}{{
 {string.Join("", state._8QueryParams.Select(qp => $"public {qp.CSType} {qp.CSNamePascal}{{get;set;}}"))}
-void AppendExececutionMessage(string msg) {{ ExecutionMessages += msg + Environment.NewLine; }}       
+void AppendExececutionMessage(string msg) {{ ExecutionMessages += msg + Environment.NewLine; }}
+{(state._5HasDynamicOrderBy?$"{n}public (Cols col, bool descending)[] OrderBy{{get;set;}}{n}":"")}
 public string ExecutionMessages {{ get; protected set; }}
 ";
 
@@ -48,6 +50,7 @@ public string ExecutionMessages {{ get; protected set; }}
                 code.AppendLine(
     $@"public virtual List<{state._4ResultInterfaceName}> Execute({state._8MethodSignature.Trim(spaceComma)}){n}{{
 {string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{ qp.CSNamePascal} = { qp.CSNameCamel};{n}"))}
+{(state._5HasDynamicOrderBy ? $"{n}OrderBy = orderBy;" : "")}
 using (IDbConnection conn = QfRuntimeConnection.GetConnection())
 {{
 conn.Open();
@@ -80,6 +83,7 @@ return returnVal;
                 code.AppendLine(
 $@"public virtual IEnumerable<{state._4ResultInterfaceName}> Execute({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null){{
 {string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{qp.CSNamePascal} = {qp.CSNameCamel};{n}"))}
+{(state._5HasDynamicOrderBy ? $"{n}OrderBy = orderBy;" : "")}
 var returnVal = Execute(conn);
 {string.Join("", state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{ qp.CSNameCamel} = { qp.CSNamePascal};{n}"))}
 return returnVal;
@@ -94,7 +98,7 @@ using(IDbCommand cmd = conn.CreateCommand())
 {{
 if(tx != null)
 cmd.Transaction = tx;
-cmd.CommandText = getCommandText();"
+cmd.CommandText = getCommandText(OrderBy);"
             );
             foreach (var qp in state._8QueryParams)
             {
@@ -152,6 +156,7 @@ yield return Create(reader);
 $@"public virtual {state._4ResultInterfaceName} GetOne({state._8MethodSignature.Trim(spaceComma)})
 {{
 {string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{qp.CSNamePascal} = {qp.CSNameCamel};{n}"))}
+{(state._5HasDynamicOrderBy ? $"{n}OrderBy = orderBy;" : "")}
 using (IDbConnection conn = QfRuntimeConnection.GetConnection())
 {{
 conn.Open();
@@ -189,6 +194,7 @@ return GetOne(conn);
 $@"public virtual {state._4ResultInterfaceName} GetOne({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
 {{
 {string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{qp.CSNamePascal} = {qp.CSNameCamel};{n}"))}
+{(state._5HasDynamicOrderBy ? $"{n}OrderBy = orderBy;" : "")}
 {{
 var returnVal = GetOne(conn);
 return returnVal;
@@ -226,6 +232,7 @@ return returnVal;
 $@"public virtual {state._7ExecuteScalarReturnType} ExecuteScalar({state._8MethodSignature.Trim(spaceComma)})
 {{
 {string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{qp.CSNamePascal} = {qp.CSNameCamel};{n}"))}
+{(state._5HasDynamicOrderBy ? $"{n}OrderBy = orderBy;" : "")}
 var returnVal = ExecuteScalar();
 {string.Join(";" + n, state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{qp.CSNameCamel} = {qp.CSNamePascal}"))};
 return returnVal;
@@ -255,8 +262,9 @@ return ExecuteScalar(conn);
 $@"public virtual {state._7ExecuteScalarReturnType} ExecuteScalar({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
 {{
 {string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{qp.CSNamePascal} = {qp.CSNameCamel};{n}"))}
+{(state._5HasDynamicOrderBy ? $"{n}OrderBy = orderBy;" : "")}
 var returnVal = ExecuteScalar(conn, tx);
-{string.Join(";"+n, state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{qp.CSNameCamel} = {qp.CSNamePascal}"))};
+{string.Join(";" + n, state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{qp.CSNameCamel} = {qp.CSNamePascal}"))};
 return returnVal;
 }}
 ");
@@ -269,7 +277,7 @@ using(IDbCommand cmd = conn.CreateCommand())
 {{
 if(tx != null)
 cmd.Transaction = tx;
-cmd.CommandText = getCommandText();
+cmd.CommandText = getCommandText(OrderBy);
 "
             );
             foreach (var qp in state._8QueryParams)
@@ -321,9 +329,11 @@ return ({state._7ExecuteScalarReturnType})result;
                 code +=
                 "public virtual int ExecuteNonQuery(" + state._8MethodSignature.Trim(spaceComma) + @")
 {
-" + string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{qp.CSNamePascal} = {qp.CSNameCamel};{n}")) + @"
+" + string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{qp.CSNamePascal} = {qp.CSNameCamel};{n}")) +
+(state._5HasDynamicOrderBy ? $"{n}OrderBy = orderBy;" : "") +
+                @"
 var returnVal = ExecuteNonQuery();
-" + string.Join(";"+n, state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{qp.CSNameCamel} = {qp.CSNamePascal}")) + @";
+" + string.Join(";" + n, state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{qp.CSNameCamel} = {qp.CSNamePascal}")) + @";
 return returnVal;
 }
 ";
@@ -350,9 +360,11 @@ return ExecuteNonQuery(conn);
                 code.AppendLine(
 "public virtual int ExecuteNonQuery(" + state._8MethodSignature + @"IDbConnection conn, IDbTransaction tx = null)
 {
-" + string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{qp.CSNamePascal} = {qp.CSNameCamel};{n}")) + @"
+" + string.Join("", state._8QueryParams.Where(qp => qp.IsInput).Select(qp => $"{qp.CSNamePascal} = {qp.CSNameCamel};{n}")) +
+(state._5HasDynamicOrderBy ? $"{n}OrderBy = orderBy;" : "") +
+                @"
 var returnVal = ExecuteNonQuery(conn, tx);
-" + string.Join(";"+n, state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{qp.CSNameCamel} = {qp.CSNamePascal}")) + @";
+" + string.Join(";" + n, state._8QueryParams.Where(qp => qp.IsOutput).Select(qp => $"{qp.CSNameCamel} = {qp.CSNamePascal}")) + @";
 return returnVal;
 }
 ");
@@ -364,7 +376,7 @@ using(IDbCommand cmd = conn.CreateCommand())
 {
 if(tx != null)
 cmd.Transaction = tx;
-cmd.CommandText = getCommandText();
+cmd.CommandText = getCommandText(OrderBy);
 "
             );
             foreach (var qp in state._8QueryParams)
@@ -431,11 +443,24 @@ return returnVal;
         {
 
             return
-@"public string getCommandText(){
-return @""
-" + state._6FinalQueryTextForCode + @"
-"";
-}";
+$@"public string getCommandText((Cols col, bool descending)[] orderBy){{
+var queryText = $@""{state._6FinalQueryTextForCode}"";
+
+// Dynamic order by
+if(orderBy != null && orderBy.Length > 0)
+{{
+    var dynamicOrderBy = $"" order by {{string.Join("", "", orderBy.Select((t)=> $""{{t.col}} {{(t.descending?""desc"":""asc"")}}"" ))}} "";
+    var pattern = @""--\s*qforderby"";
+    queryText = Regex.Replace(queryText, pattern, dynamicOrderBy, RegexOptions.IgnoreCase | RegexOptions.Multiline);
+}}
+return queryText;
+}}
+
+public enum Cols
+{{
+{string.Join(",\n", state._7ResultFields.Select((f)=>$"{f.CSColumnName} = {f.ColumnOrdinal + 1}"))}
+}}
+";
         }
         public virtual string MakeTvpPocos(State state)
         {

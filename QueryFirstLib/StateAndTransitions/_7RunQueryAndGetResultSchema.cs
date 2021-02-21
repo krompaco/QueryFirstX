@@ -17,8 +17,10 @@ namespace QueryFirst
         {
             if (state == null)
                 throw new ArgumentNullException(nameof(state));
+            // dynamic order by. Make sure, if there is one, that it's in a valid spot.
+            var queryText = Regex.Replace(state._6QueryWithParamsAdded, @"--\s*qforderby", " order by 1", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
-            var fields = _schemaFetcher.GetFields(state._3Config.DefaultConnection, state._3Config.Provider, state._6QueryWithParamsAdded);
+            var fields = _schemaFetcher.GetFields(state._3Config.DefaultConnection, state._3Config.Provider, queryText);
 
             if (fields.Count == 0)
             {

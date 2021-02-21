@@ -52,9 +52,20 @@ namespace QueryFirst
         /// this is not an insert or update, this prop will be the same as _2InitialQueryText
         /// </summary>
         public string _5QueryAfterScaffolding { get; set; }
+        /// <summary>
+        /// if the --QfOrderBy flag is found in the query text, we need 2 additional params in all the execute methods,
+        /// orderBy and descending, which will be passed through to getCommandText. If no flag, empty string.
+        /// </summary>
+        public string _5OrderByParamDeclarations { get; set; }
+        /// <summary>
+        /// if the Order By args are present in signatures, values will need to be supplied. Here we pass through the values.
+        /// </summary>
+        public string _5OrderByParamValues { get; set; }
+        public bool _5HasDynamicOrderBy { get { return !string.IsNullOrEmpty(_5OrderByParamDeclarations); } }
         public string _6NewParamDeclarations { get; set; }
         public string _6QueryWithParamsAdded { get; set; }
         public string _6FinalQueryTextForCode { get; set; }
+
         public List<ResultFieldDetails> _7ResultFields { get; set; }
 
         /// <summary>
@@ -74,7 +85,7 @@ namespace QueryFirst
         /// <summary>
         /// The inner exec methods don't have output parameters in their signature
         /// </summary>
-        public string _8InputOnlyMethodSignature { get; set; }
+        //public string _8InputOnlyMethodSignature { get; set; }
         /// <summary>
         /// string for calling inner exec methods, without out and ref params
         /// </summary>
@@ -82,7 +93,7 @@ namespace QueryFirst
         /// <summary>
         /// string for calling inner exec methods, without out and ref params
         /// </summary>
-        public string _8InputOnlyCallingArgs { get; set; }
+        //public string _8InputOnlyCallingArgs { get; set; }
         /// <summary>
         /// We need this provider-specific text in the wrapper class maker, but we have no provider, so we'll tuck it away here.
         /// </summary>

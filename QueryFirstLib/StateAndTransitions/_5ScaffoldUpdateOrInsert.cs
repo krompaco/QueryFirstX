@@ -58,6 +58,19 @@ SET
                 }
             }
             else state._5QueryAfterScaffolding = state._2InitialQueryText;
+
+            // Dynamic order by...
+            if (Regex.Match(state._5QueryAfterScaffolding,@"--\s*qforderby",RegexOptions.IgnoreCase).Success)
+            {
+                state._5OrderByParamDeclarations = "(Cols col, bool descending)[] orderBy,";
+                state._5OrderByParamValues = "orderBy,";
+            }
+            else
+            {
+                state._5OrderByParamDeclarations = "";
+                state._5OrderByParamValues = "";
+            }
+
             return state;
         }
     }

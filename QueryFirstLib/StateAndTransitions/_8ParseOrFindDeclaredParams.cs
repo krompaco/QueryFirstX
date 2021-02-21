@@ -43,10 +43,10 @@ namespace QueryFirst
             //signature trailing comma trimmed in place if needed. 
 
             state._8QueryParams = queryParams;
-            state._8MethodSignature = fullSig.ToString();
-            state._8CallingArgs = callSig.ToString();
-            state._8InputOnlyCallingArgs = inputOnlyCallSig.ToString();
-            state._8InputOnlyMethodSignature = inputOnlySig.ToString();
+            state._8MethodSignature = fullSig.ToString() + state._5OrderByParamDeclarations;
+            state._8CallingArgs = callSig.ToString() + state._5OrderByParamValues;
+            //state._8InputOnlyCallingArgs = inputOnlyCallSig.ToString();
+            //state._8InputOnlyMethodSignature = inputOnlySig.ToString();
             state._8HookupExecutionMessagesMethodText = _provider.HookUpForExecutionMessages();
 
             return state;
