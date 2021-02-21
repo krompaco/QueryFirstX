@@ -11,7 +11,7 @@ namespace QueryFirst
         public static IQfConsole Fake { get; set; }
         public static void WriteLine(string line)
         {
-            if (Fake is not null)
+            if (Fake != null)
             {
                 Fake.WriteLine(line);
             }

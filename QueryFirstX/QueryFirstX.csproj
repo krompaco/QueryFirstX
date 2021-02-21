@@ -24,7 +24,10 @@
 
   <ItemGroup>
     <Folder Include="Commands\" />
-    <Folder Include="Generators\CSharpFrameworkGenerator\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QueryFirstLib\QueryFirst.CoreLib.csproj" />
   </ItemGroup>
 
 </Project>

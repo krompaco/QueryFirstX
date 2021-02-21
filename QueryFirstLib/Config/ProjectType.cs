@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace QueryFirst
 {
-    class ProjectType
+    public class ProjectType
     {
         public string DetectProjectType()
         {

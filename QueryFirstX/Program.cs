@@ -89,6 +89,17 @@ using System.Data;
                 );
                 return;
             }
+
+            // C'est pas beau. If we've created a file or shown help, we'll do nothing else...
+            if (startupOptions.CreateConfig.GetValueOrDefault()
+                || startupOptions.CreateRuntimeConnection.GetValueOrDefault()
+                || !string.IsNullOrEmpty(startupOptions.NewQueryName)
+                || startupOptions.DidShowHelp
+            )
+            {
+                return;
+            }
+
             // Process one file
             if (File.Exists(startupOptions.SourcePath))
             {
@@ -142,7 +153,6 @@ using System.Data;
                 }
 
             }
-
             // Process a folder
             if (Directory.Exists(startupOptions.SourcePath))
             {
@@ -155,6 +165,8 @@ using System.Data;
                       | NotifyFilters.LastWrite
                       | NotifyFilters.FileName
                       | NotifyFilters.DirectoryName;
+
+                        watcher.IncludeSubdirectories = true;
 
 
                         watcher.Changed += (source, e) =>
@@ -191,7 +203,7 @@ using System.Data;
 
                         };
                         watcher.EnableRaisingEvents = true;
-                        Console.WriteLine("Press 'q' to stop watching.");
+                        Console.WriteLine($"Press 'q' to stop watching in ${startupOptions.SourcePath}");
                         while (Console.Read() != 'q') ;
                     }
                 }
@@ -274,7 +286,7 @@ using System.Data;
             catch (OptionException e)
             {
                 // output some error message
-                Console.Write("greet: ");
+                Console.Write("QueryFirst: ");
                 Console.WriteLine(e.Message);
                 Console.WriteLine("Try `QueryFirst --help' for more information.");
                 return null;
@@ -286,7 +298,10 @@ using System.Data;
                     commandLineConfig.Generators = null;
             }
             if (shouldShowHelp)
+            {
                 options.WriteOptionDescriptions(Console.Out);
+                returnVal.DidShowHelp = true;
+            }
             returnVal.StartupConfig = commandLineConfig;
             return returnVal;
         }
@@ -300,5 +315,6 @@ using System.Data;
         public bool? CreateConfig { get; set; }
         public bool? CreateRuntimeConnection { get; set; }
         public QfConfigModel StartupConfig { get; set; }
+        public bool DidShowHelp { get; set; }
     }
 }

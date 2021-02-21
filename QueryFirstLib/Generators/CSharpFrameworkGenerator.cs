@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace QueryFirst
 {
     [RegistrationName("CSharpFramework")]
-    class CSharpFrameworkGenerator : IGenerator
+    public class CSharpFrameworkGenerator : IGenerator
     {
         public QfTextFile Generate(State state)
         {

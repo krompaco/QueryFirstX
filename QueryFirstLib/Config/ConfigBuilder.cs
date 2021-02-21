@@ -31,11 +31,11 @@ namespace QueryFirst
             };
 
             // helper assemblies. Unlike other config, these cumulate.
-            if (overides.HelperAssemblies is not null)
+            if (overides.HelperAssemblies != null)
             {
                 returnVal.HelperAssemblies.AddRange(overides.HelperAssemblies);
             }
-            if (overridden.HelperAssemblies is not null)
+            if (overridden.HelperAssemblies != null)
             {
                 returnVal.HelperAssemblies.AddRange(overridden.HelperAssemblies);
             }

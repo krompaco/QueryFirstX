@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30711.63
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryFirstX", "QueryFirstX\QueryFirstX.csproj", "{C09697F9-2FBE-446B-AECD-14DCCB1A9955}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QueryFirstX", "QueryFirstX\QueryFirstX.csproj", "{C09697F9-2FBE-446B-AECD-14DCCB1A9955}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QueryFirst.CoreLib", "QueryFirstLib\QueryFirst.CoreLib.csproj", "{1190329F-35C1-4F03-803A-36E341FC72C6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{C09697F9-2FBE-446B-AECD-14DCCB1A9955}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C09697F9-2FBE-446B-AECD-14DCCB1A9955}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C09697F9-2FBE-446B-AECD-14DCCB1A9955}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1190329F-35C1-4F03-803A-36E341FC72C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1190329F-35C1-4F03-803A-36E341FC72C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1190329F-35C1-4F03-803A-36E341FC72C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1190329F-35C1-4F03-803A-36E341FC72C6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

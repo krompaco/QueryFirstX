@@ -3,7 +3,7 @@
     "QueryFirstX": {
       "commandName": "Project",
       "commandLineArgs": "-w",
-      "workingDirectory": "C:\\dev\\QfNet5"
+      "workingDirectory": "C:\\dev\\QueryFirstXTarget"
     }
   }
 }
