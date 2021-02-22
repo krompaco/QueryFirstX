@@ -98,7 +98,7 @@ using(IDbCommand cmd = conn.CreateCommand())
 {{
 if(tx != null)
 cmd.Transaction = tx;
-cmd.CommandText = getCommandText(OrderBy);"
+cmd.CommandText = getCommandText();"
             );
             foreach (var qp in state._8QueryParams)
             {
@@ -277,7 +277,7 @@ using(IDbCommand cmd = conn.CreateCommand())
 {{
 if(tx != null)
 cmd.Transaction = tx;
-cmd.CommandText = getCommandText(OrderBy);
+cmd.CommandText = getCommandText();
 "
             );
             foreach (var qp in state._8QueryParams)
@@ -376,7 +376,7 @@ using(IDbCommand cmd = conn.CreateCommand())
 {
 if(tx != null)
 cmd.Transaction = tx;
-cmd.CommandText = getCommandText(OrderBy);
+cmd.CommandText = getCommandText();
 "
             );
             foreach (var qp in state._8QueryParams)
@@ -441,15 +441,15 @@ return returnVal;
         }
         public virtual string MakeGetCommandTextMethod(State state)
         {
-
-            return
-$@"public string getCommandText((Cols col, bool descending)[] orderBy){{
+            if (state._5HasDynamicOrderBy)
+            {
+                return $@"public string getCommandText(){{
 var queryText = $@""{state._6FinalQueryTextForCode}"";
 
 // Dynamic order by
-if(orderBy != null && orderBy.Length > 0)
+if(OrderBy != null && OrderBy.Length > 0)
 {{
-    var dynamicOrderBy = $"" order by {{string.Join("", "", orderBy.Select((t)=> $""{{t.col}} {{(t.descending?""desc"":""asc"")}}"" ))}} "";
+    var dynamicOrderBy = $"" order by {{string.Join("", "", OrderBy.Select((t)=> $""{{t.col}} {{(t.descending?""desc"":""asc"")}}"" ))}} "";
     var pattern = @""--\s*qforderby"";
     queryText = Regex.Replace(queryText, pattern, dynamicOrderBy, RegexOptions.IgnoreCase | RegexOptions.Multiline);
 }}
@@ -458,9 +458,17 @@ return queryText;
 
 public enum Cols
 {{
-{string.Join(",\n", state._7ResultFields.Select((f)=>$"{f.CSColumnName} = {f.ColumnOrdinal + 1}"))}
+{string.Join($",{n}", state._7ResultFields.Select((f)=>$"{f.CSColumnName} = {f.ColumnOrdinal + 1}"))}
 }}
 ";
+            } else
+            {
+                return $@"public string getCommandText(){{
+var queryText = $@""{state._6FinalQueryTextForCode}"";
+return queryText;
+}}";
+            }
+
         }
         public virtual string MakeTvpPocos(State state)
         {
