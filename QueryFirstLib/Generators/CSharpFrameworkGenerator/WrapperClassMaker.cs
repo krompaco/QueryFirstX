@@ -45,7 +45,7 @@ public string ExecutionMessages {{ get; protected set; }}
             StringBuilder code = new StringBuilder();
             char[] spaceComma = new char[] { ',', ' ' };
             // Execute method, without connection
-            if (state._8QueryParams.Count > 0)
+            if (state._8QueryParams.Count > 0 || state._5HasDynamicOrderBy)
             {
                 code.AppendLine(
     $@"public virtual List<{state._4ResultInterfaceName}> Execute({state._8MethodSignature.Trim(spaceComma)}){n}{{
@@ -78,7 +78,7 @@ return returnVal;
         {
             StringBuilder code = new StringBuilder();
             // Execute method with connection. Use properties. First variant assigns props, then calls inner exec with no args.
-            if (state._8QueryParams.Count > 0)
+            if (state._8QueryParams.Count > 0 || state._5HasDynamicOrderBy)
             {
                 code.AppendLine(
 $@"public virtual IEnumerable<{state._4ResultInterfaceName}> Execute({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null){{
@@ -150,7 +150,7 @@ yield return Create(reader);
             {
                 char[] spaceComma = new char[] { ',', ' ' };
                 string code = "";
-                if (state._8QueryParams.Count > 0)
+                if (state._8QueryParams.Count > 0 || state._5HasDynamicOrderBy)
                 {
                     code +=
 $@"public virtual {state._4ResultInterfaceName} GetOne({state._8MethodSignature.Trim(spaceComma)})
@@ -187,7 +187,7 @@ return GetOne(conn);
             {
                 // GetOne() with connection
                 string code = "";
-                if (state._8QueryParams.Count > 0)
+                if (state._8QueryParams.Count > 0 || state._5HasDynamicOrderBy)
                 {
 
                     code +=
@@ -226,7 +226,7 @@ return returnVal;
             char[] spaceComma = new char[] { ',', ' ' };
             StringBuilder code = new StringBuilder();
             //ExecuteScalar without connection
-            if (state._8QueryParams.Count > 0)
+            if (state._8QueryParams.Count > 0 || state._5HasDynamicOrderBy)
             {
                 code.AppendLine(
 $@"public virtual {state._7ExecuteScalarReturnType} ExecuteScalar({state._8MethodSignature.Trim(spaceComma)})
@@ -256,7 +256,7 @@ return ExecuteScalar(conn);
         {
             StringBuilder code = new StringBuilder();
             // ExecuteScalar() with connection
-            if (state._8QueryParams.Count > 0)
+            if (state._8QueryParams.Count > 0 || state._5HasDynamicOrderBy)
             {
                 code.AppendLine(
 $@"public virtual {state._7ExecuteScalarReturnType} ExecuteScalar({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
@@ -324,7 +324,7 @@ return ({state._7ExecuteScalarReturnType})result;
             char[] spaceComma = new char[] { ',', ' ' };
             //ExecuteScalar without connection
             string code = "";
-            if (state._8QueryParams.Count > 0)
+            if (state._8QueryParams.Count > 0 || state._5HasDynamicOrderBy)
             {
                 code +=
                 "public virtual int ExecuteNonQuery(" + state._8MethodSignature.Trim(spaceComma) + @")
@@ -355,7 +355,7 @@ return ExecuteNonQuery(conn);
         {
             StringBuilder code = new StringBuilder();
             // ExecuteNonQuery() with connection
-            if (state._8QueryParams.Count > 0)
+            if (state._8QueryParams.Count > 0 || state._5HasDynamicOrderBy)
             {
                 code.AppendLine(
 "public virtual int ExecuteNonQuery(" + state._8MethodSignature + @"IDbConnection conn, IDbTransaction tx = null)
@@ -514,7 +514,7 @@ $@"public class {param.InnerCSType}{{
             code.AppendLine("public interface I" + state._1BaseName + "{" + Environment.NewLine);
             if (state._7ResultFields != null && state._7ResultFields.Count > 0)
             {
-                if (state._8QueryParams.Count > 0)
+                if (state._8QueryParams.Count > 0 || state._5HasDynamicOrderBy)
                 {
                     code.AppendLine(
 "List<" + state._4ResultInterfaceName + "> Execute(" + state._8MethodSignature.Trim(spaceComma) + @");
@@ -535,7 +535,7 @@ IEnumerable<" + state._4ResultInterfaceName + @"> Execute(IDbConnection conn, ID
 
                 if (state._8QueryParams.Where(qp => qp.IsOutput).Count() == 0)
                 {
-                    if (state._8QueryParams.Count > 0)
+                    if (state._8QueryParams.Count > 0 || state._5HasDynamicOrderBy)
                     {
                         code.AppendLine(
 state._4ResultInterfaceName + " GetOne(" + state._8MethodSignature.Trim(spaceComma) + @");
@@ -549,7 +549,7 @@ state._4ResultInterfaceName + " GetOne(" + state._8MethodSignature.Trim(spaceCom
                 }
                 else code.AppendLine("// GetOne methods are not available because they do not play well with output params.");
             }
-            if (state._8QueryParams.Count > 0)
+            if (state._8QueryParams.Count > 0 || state._5HasDynamicOrderBy)
             {
                 code.AppendLine(
 "int ExecuteNonQuery(" + state._8MethodSignature.Trim(spaceComma) + @");
