@@ -216,7 +216,8 @@ https://marketplace.visualstudio.com/items?itemName=bbsimonbb.QueryFirst.VSExten
                 {
                     var textDoc = ((TextDocument)Document.Object());
                     var text = textDoc.CreateEditPoint().GetText(textDoc.EndPoint);
-                    if (text.Contains("managed by QueryFirst.VSExtension"))
+                    // sby:todo test should be queryfirst on first line
+                    if (text.ToLower().Contains("queryfirst"))
                     {
                         if (CheckPrerequisites.HasPrerequites(_dte.Solution, Document.ProjectItem))
                         {
