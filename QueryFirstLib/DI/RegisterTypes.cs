@@ -40,6 +40,8 @@ namespace QueryFirst
                     }
                 }
                 assemblies.Add(Assembly.GetExecutingAssembly());
+                // QueryFirst.CoreLib
+                assemblies.Add(Assembly.GetAssembly(typeof(AdoSchemaFetcher)));
                 var then = new DateTime();
                 // First in wins
                 TinyIoCContainer.Current.AutoRegister(assemblies, DuplicateImplementationActions.RegisterSingle);

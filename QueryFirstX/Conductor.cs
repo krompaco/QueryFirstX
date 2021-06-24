@@ -141,7 +141,6 @@ The query {1} may not run and the wrapper has not been regenerated.\n",
             // todo: if a .sql is not in the project, this throws null exception. What should it do?
             new _1ProcessQueryPath().Go(state, sourcePath);
 
-            // copy namespace of generated partial class from user partial class
 
             new _2ReadQuery().Go(state);
             var _3 = new _3ResolveConfig().BuildUp();

@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QueryFirstX", "QueryFirstX\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QueryFirst.CoreLib", "QueryFirstLib\QueryFirst.CoreLib.csproj", "{1190329F-35C1-4F03-803A-36E341FC72C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryFirstVSExt", "QueryFirstVSExt\QueryFirstVSExt.csproj", "{8D418C1C-2C82-46EC-8BC3-0FE7986C9264}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryFirst.VSExtension", "QueryFirst.VSExtension\QueryFirst.VSExtension.csproj", "{A782CF00-2BAB-433F-B598-495CE72A8D12}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryFirst.QueryTemplate", "QueryFirst.QueryTemplate\QueryFirst.QueryTemplate.csproj", "{B8687258-CE20-46CB-B2B2-9484B19168F9}"
@@ -27,10 +25,6 @@ Global
 		{1190329F-35C1-4F03-803A-36E341FC72C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1190329F-35C1-4F03-803A-36E341FC72C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1190329F-35C1-4F03-803A-36E341FC72C6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8D418C1C-2C82-46EC-8BC3-0FE7986C9264}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8D418C1C-2C82-46EC-8BC3-0FE7986C9264}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8D418C1C-2C82-46EC-8BC3-0FE7986C9264}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8D418C1C-2C82-46EC-8BC3-0FE7986C9264}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A782CF00-2BAB-433F-B598-495CE72A8D12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A782CF00-2BAB-433F-B598-495CE72A8D12}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A782CF00-2BAB-433F-B598-495CE72A8D12}.Release|Any CPU.ActiveCfg = Release|Any CPU

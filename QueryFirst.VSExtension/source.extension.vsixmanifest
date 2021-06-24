@@ -6,9 +6,14 @@
         <Description xml:space="preserve">Frictionless data access for C# projects</Description>
         <MoreInfo>https://marketplace.visualstudio.com/items?itemName=bbsimonbb.QueryFirst.VSExtension</MoreInfo>
     </Metadata>
-    <Installation>
-        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[11.0,17.0]" />
-    </Installation>
+  <Installation>
+    <InstallationTarget Version="[16.0,18.0)" Id="Microsoft.VisualStudio.Community">
+      <ProductArchitecture>x86</ProductArchitecture>
+    </InstallationTarget>
+    <InstallationTarget Version="[17.0,18.0)" Id="Microsoft.VisualStudio.Community">
+      <ProductArchitecture>amd64</ProductArchitecture>
+    </InstallationTarget>
+  </Installation>
     <Dependencies>
         <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.6.1,)" />
     </Dependencies>

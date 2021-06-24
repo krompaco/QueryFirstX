@@ -10,13 +10,17 @@ namespace QueryFirst
     {
         public QfConfigModel GetInstallConfigForProjectType(List<ProjectSection> installFull, string projectType)
         {
-            return installFull.Where(c => c.ProjectType == projectType).FirstOrDefault().QfConfig;
+            return installFull?.Where(c => c.ProjectType == projectType)?.FirstOrDefault()?.QfConfig;
         }
         public QfConfigModel Resolve2Configs(QfConfigModel overridden, QfConfigModel overides)
         {            
             if(overridden == null)
             {
                 return overides;
+            }
+            if(overides == null)
+            {
+                return overridden;
             }
             QfConfigModel returnVal = new QfConfigModel
             {

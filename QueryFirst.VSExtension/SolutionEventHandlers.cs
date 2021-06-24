@@ -64,7 +64,7 @@ https://marketplace.visualstudio.com/items?itemName=bbsimonbb.QueryFirst.VSExten
                 );
                 spammed = true;
             }
-            RegisterTypes.Instance.Register(_VSOutputWindow, true);
+            RegisterTypes.Register(null, true);
 
         }
 
@@ -147,17 +147,34 @@ https://marketplace.visualstudio.com/items?itemName=bbsimonbb.QueryFirst.VSExten
                 {
                     var textDoc = ((TextDocument)Document.Object());
                     var text = textDoc.CreateEditPoint().GetText(textDoc.EndPoint);
-                    if (text.Contains("managed by QueryFirst.VSExtension"))
+                    if (text.ToLower().Contains("queryfirst"))
                     {
-                        RegisterTypes.Instance.Register(_VSOutputWindow);
+                        RegisterTypes.Register(null);
                         // get connection string
                         var state = new State();
-                        new Conductor(_VSOutputWindow, null, null).ProcessUpToStep4(Document, ref state);
+
+                        // same drill as command line.
+                        // fetch config query/project/install
+                        var configFileReader = new ConfigFileReader();
+                        var projectConfig = configFileReader.GetProjectConfig(Document.FullName);
+                        var installConfig = configFileReader.GetInstallConfig();
+
+                        var projectType = new ProjectType().DetectProjectType();
+
+                        // build config project-install
+                        var configBuilder = new ConfigBuilder();
+                        var outerConfig = configBuilder.Resolve2Configs(projectConfig, configBuilder.GetInstallConfigForProjectType(installConfig, projectType));
+
+                        // register types
+                        RegisterTypes.Register(outerConfig.HelperAssemblies);
+
+
+
+                        new Conductor(_VSOutputWindow, null, null).ProcessUpToStep4(Document.FullName, outerConfig, ref state);
 
                         if (_lastConnectedSqlWindow != Document.ActiveWindow
-                            && state._4Config.provider == "System.Data.SqlClient"
-                            && state._4Config.connectEditor2DB
-                            )
+                            && state._3Config.Provider == "System.Data.SqlClient"
+                        )
                         {
                             _lastConnectedSqlWindow = Document.ActiveWindow;
 
@@ -181,7 +198,7 @@ https://marketplace.visualstudio.com/items?itemName=bbsimonbb.QueryFirst.VSExten
 
                                 var strategyInfo = Type.GetType("Microsoft.VisualStudio.Data.Tools.SqlEditor.DataModel.DefaultSqlEditorStrategy, Microsoft.VisualStudio.Data.Tools.SqlEditor, Version=16.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
                                 var ctors = strategyInfo.GetConstructors(BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Instance);
-                                var strategyInstance = ctors[3].Invoke(new object[] { new SqlConnectionStringBuilder(state._4Config.defaultConnection), true });
+                                var strategyInstance = ctors[3].Invoke(new object[] { new SqlConnectionStringBuilder(state._3Config.DefaultConnection), true });
 
                                 var strategySetterInfo = auxiliaryDocData.GetType().GetRuntimeProperties().Where(p => p.Name == "Strategy").FirstOrDefault();
                                 strategySetterInfo.SetValue(auxiliaryDocData, strategyInstance);
@@ -197,11 +214,14 @@ https://marketplace.visualstudio.com/items?itemName=bbsimonbb.QueryFirst.VSExten
                         }
                     }
                 }
-                connecting = false;
             }
             catch (Exception ex)
             {
                 // in space no-one can hear you scream.
+            }
+            finally
+            {
+                connecting = false;
             }
         }
         void myDocumentEvents_DocumentSaved(Document Document)
@@ -210,7 +230,7 @@ https://marketplace.visualstudio.com/items?itemName=bbsimonbb.QueryFirst.VSExten
 
             //kludge
             if (!TinyIoCContainer.Current.CanResolve<IProvider>())
-                RegisterTypes.Instance.Register(_VSOutputWindow, false);
+                RegisterTypes.Register(null, false);
             if (Document.FullName.EndsWith(".sql"))
                 try
                 {

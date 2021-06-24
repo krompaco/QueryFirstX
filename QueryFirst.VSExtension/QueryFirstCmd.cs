@@ -90,7 +90,7 @@ namespace QueryFirst.VSExtension
             ThreadHelper.ThrowIfNotOnUIThread();
             DTE2 dte2 = ServiceProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE80.DTE2;//Package.GetGlobalService(typeof(DTE)) as DTE2;
             var vsOutputWindow = new VSOutputWindow(dte2);
-            RegisterTypes.Instance.Register(vsOutputWindow, false);
+            RegisterTypes.Register(null, false);
 
             foreach (Project proj in ((QueryFirstCmdPackage)_package).dte.Solution.Projects)
             {

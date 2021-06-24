@@ -41,7 +41,24 @@ namespace QueryFirst.VSExtension
                 _queryDoc = queryDoc;
                 _item = queryDoc.ProjectItem;
 
-                ProcessUpToStep4(queryDoc, ref _state);
+                // same drill as command line.
+                // fetch config query/project/install
+                var configFileReader = new ConfigFileReader();
+                var projectConfig = configFileReader.GetProjectConfig(_queryDoc.FullName);
+                var installConfig = configFileReader.GetInstallConfig();
+
+                var projectType = new ProjectType().DetectProjectType();
+
+                // build config project-install
+                var configBuilder = new ConfigBuilder();
+                var outerConfig = configBuilder.Resolve2Configs(projectConfig, configBuilder.GetInstallConfigForProjectType(installConfig, projectType));
+
+                // register types
+                RegisterTypes.Register(outerConfig.HelperAssemblies);
+
+
+
+                ProcessUpToStep4(queryDoc.FullName, outerConfig, ref _state);
 
                 // Test this! If I can get source control exclusions working, team members won't get the generated file.
                 if (!File.Exists(_state._1GeneratedClassFullFilename))
@@ -53,14 +70,14 @@ namespace QueryFirst.VSExtension
                     queryDoc.ProjectItem.Collection.AddFromFile(_state._1GeneratedClassFullFilename);
 
                 // We have the config, we can instantiate our provider...
-                if (_tiny.CanResolve<IProvider>(_state._4Config.provider))
-                    _provider = _tiny.Resolve<IProvider>(_state._4Config.provider);
+                if (_tiny.CanResolve<IProvider>(_state._3Config.Provider))
+                    _provider = _tiny.Resolve<IProvider>(_state._3Config.Provider);
                 else
                     _vsOutputWindow.Write(@"After resolving the config, we have no provider\n");
 
 
 
-                if (string.IsNullOrEmpty(_state._4Config.defaultConnection))
+                if (string.IsNullOrEmpty(_state._3Config.DefaultConnection))
                 {
                     _vsOutputWindow.Write(@"No design time connection string. You need to create qfconfig.json beside or above your query 
 or put --QfDefaultConnection=myConnectionString somewhere in your query file.
@@ -69,23 +86,23 @@ See the Readme section at https://marketplace.visualstudio.com/items?itemName=bb
                     return; // nothing to be done
 
                 }
-                if (!_tiny.CanResolve<IProvider>(_state._4Config.provider))
+                if (!_tiny.CanResolve<IProvider>(_state._3Config.Provider))
                 {
                     _vsOutputWindow.Write(string.Format(
 @"No Implementation of IProvider for providerName {0}. 
 The query {1} may not run and the wrapper has not been regenerated.\n",
-                    _state._4Config.provider, _state._1BaseName
+                    _state._3Config.Provider, _state._1BaseName
                     ));
                     return;
                 }
                 // Scaffold inserts and updates
                 _tiny.Resolve<_5ScaffoldUpdateOrInsert>().Go(ref _state);
 
-                if (_state._3InitialQueryText != _state._5QueryAfterScaffolding)
+                if (_state._2InitialQueryText != _state._5QueryAfterScaffolding)
                 {
                     var textDoc = ((TextDocument)queryDoc.Object());
                     var ep = textDoc.CreateEditPoint();
-                    ep.ReplaceText(_state._3InitialQueryText.Length, _state._5QueryAfterScaffolding, 0);
+                    ep.ReplaceText(_state._2InitialQueryText.Length, _state._5QueryAfterScaffolding, 0);
                 }
 
 
@@ -172,21 +189,14 @@ The query {1} may not run and the wrapper has not been regenerated.\n",
         /// </summary>
         /// <param name="queryDoc"></param>
         /// <param name="state"></param>
-        internal void ProcessUpToStep4(Document queryDoc, ref State state)
+        internal void ProcessUpToStep4(string sourcePath, QfConfigModel outerConfig, ref State state)
         {
             // todo: if a .sql is not in the project, this throws null exception. What should it do?
-            new _1ProcessQueryPath().Go(state, (string)queryDoc.ProjectItem.Properties.Item("FullPath").Value);
+            new _1ProcessQueryPath().Go(state, sourcePath);
 
-            // copy namespace of generated partial class from user partial class
-            var userPartialClass = File.ReadAllText(state._1UserPartialClassFullFilename);
-            new _2ExtractNamesFromUserPartialClass().Go(state, userPartialClass);
 
-            var textDoc = ((TextDocument)queryDoc.Object());
-            var start = textDoc.StartPoint;
-            var text = start.CreateEditPoint().GetText(textDoc.EndPoint);
-            new _3ReadQuery().Go(state, text);
-            var _4 = (_4ResolveConfig)_tiny.Resolve(typeof(_4ResolveConfig));
-            _4.Go(state);
+            new _2ReadQuery().Go(state);
+            new _3ResolveConfig().BuildUp().Go(state, outerConfig);
         }
         // Doesn't recurse into folders. Prefer items.Item("")
         public static ProjectItem GetItemByFilename(ProjectItem item, string filename)
@@ -225,7 +235,7 @@ The query {1} may not run and the wrapper has not been regenerated.\n",
 
             Code.Append(_wrapper.StartNamespace(state));
             Code.Append(_wrapper.Usings(state));
-            if (state._4Config.makeSelfTest)
+            if (state._3Config.MakeSelfTest.GetValueOrDefault())
                 Code.Append(_wrapper.SelfTestUsings(state));
             if (state._7ResultFields != null && state._7ResultFields.Count > 0)
                 Code.Append(_results.Usings());
@@ -237,7 +247,7 @@ The query {1} may not run and the wrapper has not been regenerated.\n",
             //Code.Append(_provider.MakeAddAParameter(state));
             Code.Append(_wrapper.MakeTvpPocos(state));
 
-            if (state._4Config.makeSelfTest)
+            if (state._3Config.MakeSelfTest.GetValueOrDefault())
                 Code.Append(_wrapper.MakeSelfTestMethod(state));
             if (state._7ResultFields != null && state._7ResultFields.Count > 0)
             {
