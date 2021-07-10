@@ -135,9 +135,6 @@
     <Content Include="stylesheet.css" />
   </ItemGroup>
   <ItemGroup>
-    <SNIFiles Condition="'$(MSBuildThisFileDirectory)' != '' And&#xD;&#xA;							   HasTrailingSlash('$(MSBuildThisFileDirectory)')" Include="$(MSBuildThisFileDirectory)**\SNI.*" />
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="Azure.Core, Version=1.6.0.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">
       <HintPath>..\packages\Azure.Core.1.6.0\lib\net461\Azure.Core.dll</HintPath>
     </Reference>
