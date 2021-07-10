@@ -197,6 +197,7 @@ The query {1} may not run and the wrapper has not been regenerated.\n",
 
             new _2ReadQuery().Go(state);
             new _3ResolveConfig().BuildUp().Go(state, outerConfig);
+            new _4ExtractNamesFromUserPartialClass().Go(state);
         }
         // Doesn't recurse into folders. Prefer items.Item("")
         public static ProjectItem GetItemByFilename(ProjectItem item, string filename)
