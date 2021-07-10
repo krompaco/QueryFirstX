@@ -124,11 +124,18 @@
       <ResourceName>Menus.ctmenu</ResourceName>
     </VSCTCompile>
     <Content Include="license.txt" />
+    <Content Include="Microsoft.Data.SqlClient.SNI.x86.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Content Include="ReadMe.txt" />
     <Content Include="Resources\16.bmp" />
     <Content Include="Resources\QueryFirstCmd.png" />
     <Content Include="Resources\QueryFirstCmdPackage.ico" />
     <Content Include="stylesheet.css" />
+  </ItemGroup>
+  <ItemGroup>
+    <SNIFiles Condition="'$(MSBuildThisFileDirectory)' != '' And&#xD;&#xA;							   HasTrailingSlash('$(MSBuildThisFileDirectory)')" Include="$(MSBuildThisFileDirectory)**\SNI.*" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Azure.Core, Version=1.6.0.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">
