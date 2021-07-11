@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>QueryFirst.CoreLib</PackageId>
-    <Version>0.0.4</Version>
-    <Authors>Simon_Boddy</Authors>
+    <Version>2.0.0</Version>
+    <Authors>Simon Boddy</Authors>
     <Title>QueryFirst core library</Title>
     <Description>Core QueryFirst functionality. Include this package in your .net CLR projects to support the generated self-tests.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

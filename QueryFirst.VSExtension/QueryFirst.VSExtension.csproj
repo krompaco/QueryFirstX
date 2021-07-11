@@ -514,7 +514,7 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
     </ProjectReference>
-    <ProjectReference Include="..\QueryFirstLib\QueryFirst.CoreLib.csproj">
+    <ProjectReference Include="..\QueryFirst.CoreLib\QueryFirst.CoreLib.csproj">
       <Project>{1190329f-35c1-4f03-803a-36e341fc72c6}</Project>
       <Name>QueryFirst.CoreLib</Name>
     </ProjectReference>
