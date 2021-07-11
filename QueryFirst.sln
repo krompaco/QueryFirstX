@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryFirst.VSExtension", "Q
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryFirst.QueryTemplate", "QueryFirst.QueryTemplate\QueryFirst.QueryTemplate.csproj", "{B8687258-CE20-46CB-B2B2-9484B19168F9}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{CDD7128B-E35C-4705-924C-EC7A7C88F3D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
