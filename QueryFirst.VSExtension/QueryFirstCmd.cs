@@ -113,7 +113,7 @@ namespace QueryFirst.VSExtension
                             item.Open();
                             var textDoc = ((TextDocument)item.Document.Object());
                             var text = textDoc.CreateEditPoint().GetText(textDoc.EndPoint);
-                            if (text.Contains("managed by QueryFirst.VSExtension"))
+                            if (text.ToLower().Contains("queryfirst"))
                             {
                                 new Conductor(vsOutputWindow, null, null).ProcessOneQuery(item.Document);
                             }
