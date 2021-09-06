@@ -1,0 +1,7 @@
+{
+  "defaultConnection": "Server = localhost\\SQLEXPRESS; Database = NORTHWND; Trusted_Connection = True; ",
+  "provider": "System.Data.SqlClient",
+  "namespace": "Net5CmdLineTestTarget",
+  "connectEditor2DB": true
+}
+            
