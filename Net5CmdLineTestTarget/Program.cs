@@ -10,7 +10,8 @@ namespace Net5CmdLineTestTarget
     {
         public static void Main(string[] args)
         {
-
+            var result = new GetCustomers().Execute();
+            result.ForEach(l => Console.WriteLine($"{l.ContactName} {l.City}"));
         }
     }
 

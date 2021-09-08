@@ -33,15 +33,6 @@ namespace QueryFirst.VSExtension
             string parentPath = null;
             if (path.EndsWith(".gen.cs"))
                 parentPath = path.Replace(".gen.cs", ".sql");
-            if (path.EndsWith("Results.cs"))
-            {
-                parentPath = path.Replace("Results.cs", ".sql");
-                // correct class names
-                var _userPartialClass = File.ReadAllText(path);
-                _userPartialClass = _userPartialClass.Replace("Results", "");
-                _userPartialClass = _userPartialClass.Replace("¤", "Results");
-                File.WriteAllText(path, _userPartialClass);
-            }
             if (!string.IsNullOrEmpty(parentPath))
             {
                 ProjectItem parent = item.DTE.Solution.FindProjectItem(parentPath);
