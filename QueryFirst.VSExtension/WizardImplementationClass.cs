@@ -33,6 +33,8 @@ namespace QueryFirst.VSExtension
             string parentPath = null;
             if (path.EndsWith(".gen.cs"))
                 parentPath = path.Replace(".gen.cs", ".sql");
+            if (path.EndsWith(".qfconfig.json"))
+                parentPath = path.Replace(".qfconfig.json", ".sql");
             if (!string.IsNullOrEmpty(parentPath))
             {
                 ProjectItem parent = item.DTE.Solution.FindProjectItem(parentPath);

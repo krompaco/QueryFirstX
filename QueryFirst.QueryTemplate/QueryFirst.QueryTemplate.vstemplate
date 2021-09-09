@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <VSTemplate Version="3.0.0" Type="Item" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" xmlns:sdk="http://schemas.microsoft.com/developer/vstemplate-sdkextension/2010">
   <TemplateData>
-    <Name>QueryFirst.QueryTemplate</Name>
+    <DefaultName>Query.sql</DefaultName>
+    <Name>QueryFirst Query</Name>
     <Description>QueryFirst.QueryTemplate</Description>
-    <Icon>QueryFirst.QueryTemplate.ico</Icon>
+    <Icon>sql.ico</Icon>
     <TemplateID>73421152-63cd-419b-91e3-3387ff523296</TemplateID>
     <ProjectType>CSharp</ProjectType>
-    <RequiredFrameworkVersion>2.0</RequiredFrameworkVersion>
-    <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
+    <SortOrder>9</SortOrder>
   </TemplateData>
   <TemplateContent>
     <References>
@@ -15,5 +15,12 @@
         <Assembly>System</Assembly>
       </Reference>
     </References>
+    <ProjectItem ReplaceParameters="true" ItemType="None">Query.sql</ProjectItem>
+    <ProjectItem ReplaceParameters="true" TargetFileName="$fileinputname$.gen.cs">Query.gen.cs</ProjectItem>
+    <ProjectItem ReplaceParameters="true" TargetFileName="$fileinputname$.qfconfig.json">Query.qfconfig.json</ProjectItem>
   </TemplateContent>
+  <WizardExtension>
+    <Assembly>QueryFirst.VSExtension, Version=2.0.0.0, Culture=neutral, PublicKeyToken=4688a60b10e39f04</Assembly>
+    <FullClassName>QueryFirst.VSExtension.WizardImplementation</FullClassName>
+  </WizardExtension>
 </VSTemplate>
