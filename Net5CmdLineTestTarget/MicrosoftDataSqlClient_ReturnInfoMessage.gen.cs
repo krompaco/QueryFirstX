@@ -7,9 +7,9 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Text.RegularExpressions;
-using static MicrosoftDataProvider;
+using static MicrosoftDataSqlClient_ReturnInfoMessage;
 
-public interface IMicrosoftDataProvider{
+public interface IMicrosoftDataSqlClient_ReturnInfoMessage{
 
 int ExecuteNonQuery();            
 int ExecuteNonQuery(IDbConnection conn, IDbTransaction tx = null);
@@ -17,7 +17,7 @@ int ExecuteNonQuery(IDbConnection conn, IDbTransaction tx = null);
 string ExecutionMessages { get; }
 }
 
-public partial class MicrosoftDataProvider : IMicrosoftDataProvider
+public partial class MicrosoftDataSqlClient_ReturnInfoMessage : IMicrosoftDataSqlClient_ReturnInfoMessage
 {
 
 void AppendExececutionMessage(string msg) { ExecutionMessages += msg + Environment.NewLine; }
@@ -50,10 +50,12 @@ return result;
 }
 
 public string getCommandText(){
-var queryText = $@"/* .sql query managed by QueryFirst add-in */
-/*designTime - put parameter declarations and design time initialization here
+var queryText = $@"-- use querfirst
+/*designTime
+
 endDesignTime*/
 
+PRINT 'hello cobber'
 ";
 return queryText;
 }}

@@ -3,7 +3,7 @@
     "QueryFirstX": {
       "commandName": "Project",
       "commandLineArgs": "-w",
-      "workingDirectory": "C:\\dev\\QueryFirstXTarget"
+      "workingDirectory": "C:\\dev\\QueryFirst\\Net5CmdLineTestTarget"
     }
   }
 }
