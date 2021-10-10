@@ -12,14 +12,14 @@ namespace QueryFirst
         {
             return @"using System;
 using System.Data;
-using Microsoft.Data.SqlClient;
 using System.IO;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Text.RegularExpressions;" +
 $@"{n}using static {state._1BaseName};
-{(state._8HasTableValuedParams ? $@"{n}using FastMember; // Table valued params require the FastMember Nuget package{n}" : n)}";
+{(state._8HasTableValuedParams ? $@"{n}using FastMember; // Table valued params require the FastMember Nuget package{n}" : n)}"
++ state._6ProviderSpecificUsings;
         }
 
         public virtual string StartNamespace(State state)
@@ -430,11 +430,11 @@ var returnVal = CreatePoco(record);
     returnVal.{f.CSColumnName } =  ({ f.TypeCsShort })record[{ index }];
 "))
 }
-// vestige from user partial
-//returnVal.OnLoad();
+// provide a hook to override
+returnVal.OnLoad();
 return returnVal;
 }}
-{ state._4ResultInterfaceName } CreatePoco(System.Data.IDataRecord record)
+protected virtual { state._4ResultInterfaceName } CreatePoco(System.Data.IDataRecord record)
 {{
     return new { state._4ResultClassName }();
 }}";

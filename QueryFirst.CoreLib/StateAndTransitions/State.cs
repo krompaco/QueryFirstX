@@ -65,6 +65,7 @@ namespace QueryFirst
         public string _6NewParamDeclarations { get; set; }
         public string _6QueryWithParamsAdded { get; set; }
         public string _6FinalQueryTextForCode { get; set; }
+        public string _6ProviderSpecificUsings { get; set; }
 
         public List<ResultFieldDetails> _7ResultFields { get; set; }
 

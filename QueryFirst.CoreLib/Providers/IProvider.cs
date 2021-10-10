@@ -64,5 +64,14 @@ namespace QueryFirst
         /// <param name="state"></param>
         /// <returns></returns>
         string HookUpForExecutionMessages();
+
+        /// <summary>
+        /// The generated code is DB-agnostic with one exception for the moment.
+        /// We need to cast a System.Data.DBConnection to [System/Microsoft].Data.SqlClient
+        /// to recover SqlInfoMessages. So we infer your prod db from your design time db, and
+        /// put a using in the generated code to permit this cast.
+        /// </summary>
+        /// <returns></returns>
+        string GetProviderSpecificUsings();
     }
 }

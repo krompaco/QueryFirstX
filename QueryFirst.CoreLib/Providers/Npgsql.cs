@@ -240,5 +240,7 @@ namespace QueryFirst.Providers
         {
             return "";
         }
+
+        public string GetProviderSpecificUsings() => "";
     }
 }

@@ -1,0 +1,3 @@
+﻿{
+  "generators": [ { "Name": "CSharpAsync" } ] 
+}

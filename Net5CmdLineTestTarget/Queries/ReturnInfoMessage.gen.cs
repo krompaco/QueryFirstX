@@ -1,15 +1,15 @@
 namespace Net5CmdLineTestTarget{
 using System;
 using System.Data;
-using Microsoft.Data.SqlClient;
 using System.IO;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Text.RegularExpressions;
-using static MicrosoftDataProvider;
+using static ReturnInfoMessage;
 
-public interface IMicrosoftDataProvider{
+using System.Data.SqlClient;
+public interface IReturnInfoMessage{
 
 int ExecuteNonQuery();            
 int ExecuteNonQuery(IDbConnection conn, IDbTransaction tx = null);
@@ -17,7 +17,7 @@ int ExecuteNonQuery(IDbConnection conn, IDbTransaction tx = null);
 string ExecutionMessages { get; }
 }
 
-public partial class MicrosoftDataProvider : IMicrosoftDataProvider
+public partial class ReturnInfoMessage : IReturnInfoMessage
 {
 
 void AppendExececutionMessage(string msg) { ExecutionMessages += msg + Environment.NewLine; }
@@ -33,7 +33,9 @@ return ExecuteNonQuery(conn);
 }
 }
 public virtual int ExecuteNonQuery(IDbConnection conn, IDbTransaction tx = null){
-((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(delegate (object sender, SqlInfoMessageEventArgs e) { AppendExececutionMessage(e.Message); });
+// this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
+((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
+    delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });
 using(IDbCommand cmd = conn.CreateCommand())
 {
 if(tx != null)
@@ -50,11 +52,14 @@ return result;
 }
 
 public string getCommandText(){
-var queryText = $@"/* .sql query managed by QueryFirst add-in */
-/*designTime - put parameter declarations and design time initialization here
+var queryText = $@"-- use querfirst
+/*designTime
+
 endDesignTime*/
 
+PRINT 'hello cobber'
 ";
 return queryText;
-}}
+}protected internal virtual void OnLoad(){}
+}
 }

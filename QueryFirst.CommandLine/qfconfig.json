@@ -11,7 +11,7 @@
 		"projectType": "cSharp",
 		"qfConfig": {
 			"generators": [
-				{ "name": "cSharp" }
+				{ "name": "CSharp" }
 			]
 		}
 	}

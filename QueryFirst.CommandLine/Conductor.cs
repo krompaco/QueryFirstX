@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization.Json;
 using System.Text;
 
@@ -116,10 +117,23 @@ The query {1} may not run and the wrapper has not been regenerated.\n",
                     File.WriteAllText(_state._1CurrDir + "qfDumpState.json", Encoding.UTF8.GetString(json, 0, json.Length));
                 }
 #endif
+                var generators = _state._3Config.Generators.Select(generator =>
+                {
+                    if (_tiny.CanResolve<IGenerator>(generator.Name))
+                        return _tiny.Resolve<IGenerator>(generator.Name);
+                    else
+                    {
+                        Console.WriteLine($"Cannot resolve generator with RegistrationName {generator.Name}");
+                        return null;
+                    }
+                }).Where(gen=>gen != null);
 
-                var code = new CSharpFrameworkGenerator().Generate(_state);
+                foreach (var generator in generators)
+                {
+                    var codeFile = generator.Generate(_state);
+                    QfTextFileWriter.WriteFile(codeFile);
+                }
                 //File.WriteAllText(ctx.GeneratedClassFullFilename, Code.ToString());
-                QfTextFileWriter.WriteFile(code);
 
                 QfConsole.WriteLine("QueryFirst generated wrapper class for " + _state._1BaseName + ".sql" + Environment.NewLine);
 

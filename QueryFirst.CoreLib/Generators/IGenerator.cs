@@ -1,6 +1,6 @@
 ﻿namespace QueryFirst
 {
-    interface IGenerator
+    public interface IGenerator
     {
         QfTextFile Generate(State state);
     }

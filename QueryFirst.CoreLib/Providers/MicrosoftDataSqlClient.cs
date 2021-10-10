@@ -8,9 +8,6 @@ namespace QueryFirst.Providers
 
     class MicrosoftDataSqlClient : SqlClient
     {
-        public override string HookUpForExecutionMessages()
-        {
-            return "";
-        }
+        public override string GetProviderSpecificUsings() => "using Microsoft.Data.SqlClient;" + Environment.NewLine;
     }
 }

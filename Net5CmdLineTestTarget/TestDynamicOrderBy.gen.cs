@@ -1,7 +1,6 @@
 namespace Net5CmdLineTestTarget{
 using System;
 using System.Data;
-using Microsoft.Data.SqlClient;
 using System.IO;
 using System.Collections.Generic;
 using System.Configuration;
@@ -9,6 +8,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using static TestDynamicOrderBy;
 
+using System.Data.SqlClient;
 public interface ITestDynamicOrderBy{
 
 List<TestDynamicOrderByResults> Execute((Cols col, bool descending)[] orderBy);
@@ -69,7 +69,9 @@ return returnVal;
 }
 
 public virtual int ExecuteNonQuery(IDbConnection conn, IDbTransaction tx = null){
-((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(delegate (object sender, SqlInfoMessageEventArgs e) { AppendExececutionMessage(e.Message); });
+// this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
+((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
+    delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });
 using(IDbCommand cmd = conn.CreateCommand())
 {
 if(tx != null)
@@ -154,7 +156,9 @@ return returnVal;
 }
 public virtual IEnumerable<TestDynamicOrderByResults> Execute(IDbConnection conn, IDbTransaction tx = null){
 
-((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(delegate (object sender, SqlInfoMessageEventArgs e) { AppendExececutionMessage(e.Message); });
+// this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
+((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
+    delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });
 using(IDbCommand cmd = conn.CreateCommand())
 {
 if(tx != null)
@@ -203,7 +207,9 @@ return returnVal;
 }
 }public virtual TestDynamicOrderByResults GetOne(IDbConnection conn, IDbTransaction tx = null)
 {
-((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(delegate (object sender, SqlInfoMessageEventArgs e) { AppendExececutionMessage(e.Message); });
+// this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
+((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
+    delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });
 {
 var all = Execute(conn,tx);
 TestDynamicOrderByResults returnVal;
@@ -246,7 +252,9 @@ return returnVal;
 
 public virtual System.String ExecuteScalar(IDbConnection conn, IDbTransaction tx = null)
 {
-((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(delegate (object sender, SqlInfoMessageEventArgs e) { AppendExececutionMessage(e.Message); });
+// this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
+((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
+    delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });
 using(IDbCommand cmd = conn.CreateCommand())
 {
 if(tx != null)
@@ -302,11 +310,11 @@ var returnVal = CreatePoco(record);
     if(record[10] != null && record[10] != DBNull.Value)
     returnVal.Fax =  (string)record[10];
 
-// vestige from user partial
-//returnVal.OnLoad();
+// provide a hook to override
+returnVal.OnLoad();
 return returnVal;
 }
-TestDynamicOrderByResults CreatePoco(System.Data.IDataRecord record)
+protected virtual TestDynamicOrderByResults CreatePoco(System.Data.IDataRecord record)
 {
     return new TestDynamicOrderByResults();
 }}
@@ -366,5 +374,6 @@ public string Fax{
 get{return _Fax;}
 set{_Fax = value;}
 }
+protected internal virtual void OnLoad(){}
 }
 }

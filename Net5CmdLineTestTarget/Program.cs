@@ -14,18 +14,24 @@ namespace Net5CmdLineTestTarget
             var result = new GetCustomers().Execute();
             result.ForEach(l => Console.WriteLine($"{l.ContactName} {l.City}"));
 
-            // I'm not reproducing the elcia issue here. Need to try this at work.
-            var TestMessagesWithMicrosoftDataSqlClient = new MicrosoftDataSqlClient_ReturnInfoMessage();
-            using( var conn = new Microsoft.Data.SqlClient.SqlConnection("Server = localhost\\SQLEXPRESS; Database = NORTHWND; Trusted_Connection = True; "))
+            //var infoMsgResult = new ReturnInfoMessage().ExecuteNonQuery();
+
+            // For info messages, the runtime connection needs to be consistent with the design time.
+            // In this project QfRuntimeConnection is System.Data.SqlClient. The following query forces the provider to 
+            // Microsoft.Data.SqlClient, so the runtime connection has to follow.
+            using(var conn = new Microsoft.Data.SqlClient.SqlConnection("Server = localhost\\SQLEXPRESS; Database = NORTHWND; Trusted_Connection = True; "))
             {
                 conn.Open();
-                var msgResult = TestMessagesWithMicrosoftDataSqlClient.ExecuteNonQuery(conn);
+                var MSInfoMsgResult = new ReturnInfoMessage_MicrosoftData().ExecuteNonQuery(conn);
             }
+
 
             // Test Dynamic OrderBy
             var query = new TestDynamicOrderBy();
             var sorted = query.Execute(new[] { (TestDynamicOrderBy.Cols.ContactName, false) });
             sorted.ForEach(l => Console.WriteLine($"{l.ContactName} {l.City}"));
+
+            var asyncResult = new GetCustomersAsync().ExecuteAsync().Result;
 
         }
     }

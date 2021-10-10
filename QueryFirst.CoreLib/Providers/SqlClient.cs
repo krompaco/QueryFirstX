@@ -441,8 +441,12 @@ namespace QueryFirst.Providers
 
         public virtual string HookUpForExecutionMessages()
         {
-            return "((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(delegate (object sender, SqlInfoMessageEventArgs e) { AppendExececutionMessage(e.Message); });";
+            return $@"// this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
+((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
+    delegate (object sender, SqlInfoMessageEventArgs e)  {{ AppendExececutionMessage(e.Message); }});";
         }
+
+        public virtual string GetProviderSpecificUsings() => "using System.Data.SqlClient;" + Environment.NewLine;
 
         class ParamFromText
         {

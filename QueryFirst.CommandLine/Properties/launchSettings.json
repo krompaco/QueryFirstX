@@ -4,6 +4,11 @@
       "commandName": "Project",
       "commandLineArgs": "-w",
       "workingDirectory": "C:\\dev\\QueryFirst\\Net5CmdLineTestTarget"
+    },
+    "WatchNet5TestTarget": {
+      "commandName": "Project",
+      "commandLineArgs": "-w",
+      "workingDirectory": "C:\\dev\\QueryFirst\\Net5CmdLineTestTarget"
     }
   }
 }

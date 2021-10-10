@@ -42,6 +42,8 @@ namespace QueryFirst
                     // for inclusion in a verbatim string, only modif required is to double double quotes
                     .Replace("\"", "\"\"");
 
+            state._6ProviderSpecificUsings = _provider.GetProviderSpecificUsings();
+
             return state;
         }
     }
