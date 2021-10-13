@@ -8,6 +8,19 @@ namespace QueryFirst
 {
     public class ConfigFileReader : IConfigFileReader
     {
+
+        public QfConfigModel ReadAndResolveProjectAndInstallConfigs(StartupOptions startupOptions, ConfigFileReader configFileReader)
+        {
+            var projectConfig = GetProjectConfig(startupOptions.SourcePath);
+            var installConfig = GetInstallConfig();
+
+            var projectType = new ProjectType().DetectProjectType();
+
+            // build config project-install
+            var configBuilder = new ConfigBuilder();
+            var outerConfig = configBuilder.Resolve2Configs(projectConfig, configBuilder.GetInstallConfigForProjectType(installConfig, projectType));
+            return outerConfig;
+        }
         /// <summary>
         /// Returns the string contents of the first qfconfig.json file found,
         /// starting in the directory of the path supplied and going up.

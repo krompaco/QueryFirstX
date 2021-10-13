@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace QueryFirst
 {
-    class QfTextFileWriter : IQfTextFileWriter
+    public class QfTextFileWriter : IQfTextFileWriter
     {
         public void WriteFile(QfTextFile fileToWrite)
         {

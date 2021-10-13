@@ -114,6 +114,10 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <Content Include="qfconfig.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
@@ -133,6 +137,7 @@
     <Content Include="Resources\QueryFirstCmd.png" />
     <Content Include="Resources\QueryFirstCmdPackage.ico" />
     <Content Include="stylesheet.css" />
+    <Content Include="qfconfig.json" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Azure.Core, Version=1.6.0.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">

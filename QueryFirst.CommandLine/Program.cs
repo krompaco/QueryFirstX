@@ -21,14 +21,7 @@ namespace QueryFirst
             }
             // fetch config query/project/install
             var configFileReader = new ConfigFileReader();
-            var projectConfig = configFileReader.GetProjectConfig(startupOptions.SourcePath);
-            var installConfig = configFileReader.GetInstallConfig();
-
-            var projectType = new ProjectType().DetectProjectType();
-
-            // build config project-install
-            var configBuilder = new ConfigBuilder();
-            var outerConfig = configBuilder.Resolve2Configs(projectConfig, configBuilder.GetInstallConfigForProjectType(installConfig, projectType));
+            QfConfigModel outerConfig = configFileReader.ReadAndResolveProjectAndInstallConfigs(startupOptions, configFileReader);
 
             // register types
             RegisterTypes.Register(outerConfig.HelperAssemblies);
@@ -221,6 +214,7 @@ using System.Data;
 
             }
         }
+
         // Process all files in the directory passed in, recurse on any directories
         // that are found, and process the files they contain.
         public static void ProcessDirectory(string targetDirectory, QfConfigModel outerConfig)
@@ -306,15 +300,5 @@ using System.Data;
             return returnVal;
         }
 
-    }
-    public class StartupOptions
-    {
-        public string SourcePath { get; set; }
-        public bool Watch { get; set; }
-        public string NewQueryName { get; set; }
-        public bool? CreateConfig { get; set; }
-        public bool? CreateRuntimeConnection { get; set; }
-        public QfConfigModel StartupConfig { get; set; }
-        public bool DidShowHelp { get; set; }
     }
 }

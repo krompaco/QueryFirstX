@@ -58,7 +58,7 @@ Would you like us to create this for you? You will need to modify the connection
 @"{
   ""defaultConnection"": ""Server=localhost\\SQLEXPRESS;Database=NORTHWND;Trusted_Connection=True;"",
   ""provider"": ""System.Data.SqlClient"",
-  ""connectEditor2DB"":false
+  ""connectEditor2DB"":true
 }"
                 );
                     var config = item.ContainingProject.ProjectItems.AddFromFile(configFileNameAndPath);

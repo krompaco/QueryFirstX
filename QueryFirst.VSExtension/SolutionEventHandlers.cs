@@ -89,26 +89,8 @@ https://marketplace.visualstudio.com/items?itemName=bbsimonbb.QueryFirst.VSExten
 
                             fuxed++;
                         }
-                        if (item.Name == OldName.Replace(".sql", "Results.cs"))
-                        {
-                            item.Name = renamedQuery.Name.Replace(".sql", "Results.cs");
-                            var oldBaseName = OldName.Replace(".sql", "");
-                            var newBaseName = renamedQuery.Name.Replace(".sql", "");
-                            bool rememberToClose = false;
-                            if (!item.IsOpen)
-                            {
-                                item.Open();
-                                rememberToClose = true;
-                            }
-                            var userFile = ((TextDocument)item.Document.Object());
-                            userFile.ReplacePattern(oldBaseName, newBaseName);
-                            item.Document.Save();
 
-                            if (rememberToClose)
-                                item.Document.Close();
-                            fuxed++;
-                        }
-                        if (fuxed == 2)
+                        if (fuxed == 1)
                         {
                             // regenerate query in new location.
                             var rememberToClose1 = false;

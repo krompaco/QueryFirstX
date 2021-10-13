@@ -16,13 +16,13 @@ namespace QueryFirst
         private State _state;
         private TinyIoCContainer _tiny;
         private IProvider _provider;
-        private IWrapperClassMaker _wrapper;
-        private IResultClassMaker _results;
 
         public Conductor()
         {
             _tiny = TinyIoCContainer.Current;
         }
+
+        // DI via property injection
         public IQfTextFileWriter QfTextFileWriter { get; set; }
 
         public void ProcessOneQuery(string sourcePath, QfConfigModel outerConfig)
@@ -67,7 +67,7 @@ The query {1} may not run and the wrapper has not been regenerated.\n",
 
                 if (_state._2InitialQueryText != _state._5QueryAfterScaffolding)
                 {
-                    
+
                 }
 
 
@@ -81,9 +81,10 @@ The query {1} may not run and the wrapper has not been regenerated.\n",
                     // if undeclared params were found, modify the original .sql
                     if (!string.IsNullOrEmpty(_state._6NewParamDeclarations))
                     {
-                        QfTextFileWriter.WriteFile(new QfTextFile() { 
-                            Filename = _state._1SourceQueryFullPath, 
-                            FileContents = _state._6QueryWithParamsAdded 
+                        QfTextFileWriter.WriteFile(new QfTextFile()
+                        {
+                            Filename = _state._1SourceQueryFullPath,
+                            FileContents = _state._6QueryWithParamsAdded
                         });
                     }
 
@@ -117,25 +118,14 @@ The query {1} may not run and the wrapper has not been regenerated.\n",
                     File.WriteAllText(_state._1CurrDir + "qfDumpState.json", Encoding.UTF8.GetString(json, 0, json.Length));
                 }
 #endif
-                var generators = _state._3Config.Generators.Select(generator =>
+                var codeFiles = new InstantiateAndCallGenerators().Go(_state);
+                var fileWriter = new QfTextFileWriter();
+                foreach(var codeFile in codeFiles)
                 {
-                    if (_tiny.CanResolve<IGenerator>(generator.Name))
-                        return _tiny.Resolve<IGenerator>(generator.Name);
-                    else
-                    {
-                        Console.WriteLine($"Cannot resolve generator with RegistrationName {generator.Name}");
-                        return null;
-                    }
-                }).Where(gen=>gen != null);
-
-                foreach (var generator in generators)
-                {
-                    var codeFile = generator.Generate(_state);
-                    QfTextFileWriter.WriteFile(codeFile);
+                    fileWriter.WriteFile(codeFile);
+                    QfConsole.WriteLine($"QueryFirst wrote {codeFile.Filename + Environment.NewLine}");
                 }
-                //File.WriteAllText(ctx.GeneratedClassFullFilename, Code.ToString());
 
-                QfConsole.WriteLine("QueryFirst generated wrapper class for " + _state._1BaseName + ".sql" + Environment.NewLine);
 
             }
             catch (Exception ex)
@@ -143,6 +133,8 @@ The query {1} may not run and the wrapper has not been regenerated.\n",
                 QfConsole.WriteLine(ex.TellMeEverything());
             }
         }
+
+
 
         /// <summary>
         /// Now we can connect the editor window, we need to recover the connection string when we open a query.

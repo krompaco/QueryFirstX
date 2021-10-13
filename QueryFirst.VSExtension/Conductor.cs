@@ -149,13 +149,15 @@ The query {1} may not run and the wrapper has not been regenerated.\n",
                     File.WriteAllText(_state._1CurrDir + "qfDumpState.json", Encoding.UTF8.GetString(json, 0, json.Length));
                 }
 #endif
-
+                var codeFiles = new InstantiateAndCallGenerators().Go(_state);
+                var fileWriter = new QfTextFileWriter();
+                foreach (var codeFile in codeFiles)
+                {
+                    var genFile = GetItemByFilename(queryDoc.ProjectItem, codeFile.Filename);
+                    WriteAndFormat(genFile, codeFile.FileContents);
+                    QfConsole.WriteLine($"QueryFirst wrote {codeFile.Filename + Environment.NewLine}");
+                }
                 var code = GenerateCode(_state);
-                //File.WriteAllText(ctx.GeneratedClassFullFilename, Code.ToString());
-                var genFile = GetItemByFilename(queryDoc.ProjectItem, _state._1GeneratedClassFullFilename);
-                WriteAndFormat(genFile, code);
-                // what was this for ????
-                //var partialClassFile = GetItemByFilename(_ctx.QueryDoc.ProjectItem, _state._1CurrDir + _state._1BaseName + "Results.cs");
                 _vsOutputWindow.Write("QueryFirst.VSExtension generated wrapper class for " + _state._1BaseName + ".sql" + Environment.NewLine);
 
             }
